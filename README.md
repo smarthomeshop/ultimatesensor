@@ -28,7 +28,7 @@ For more details, visit our website: [UltimateSensor](https://ultimatesensor.nl/
 
 - UltimateSensor
 - USB-C power cable
-- Ethernet cable
+- USB-C Power Adapter (European)
 - Quick Start Guide
 
 ## Installation and Setup
@@ -37,7 +37,7 @@ Detailed installation instructions and the integration guide for Home Assistant 
 
 ## Contributing
 
-Interested in contributing to the UltimateSensor Mini project? Your contributions are welcome! Please submit a pull request or open an issue on this repository.
+Interested in contributing to the UltimateSensor project? Your contributions are welcome! Please submit a pull request or open an issue on this repository.
 
 ## Support
 
