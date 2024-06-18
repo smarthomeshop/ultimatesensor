@@ -1,5 +1,5 @@
 # UltimateSensor Complete Configuration 
-# For WiFi usage!
+# For Ethernet (PoE) usage!
 # This configuration includes settings for all sensors, including the Particulate Matter (PM) sensor.
 # Use this file if your device includes the PM/fine dust measurement capability.
 
@@ -9,7 +9,7 @@ substitutions:
   friendly_name: "UltimateSensor"
   ultimatesensor_software_version: "1.0"
   ultimatesensor_hardware_version: "V1-Complete"
-  ultimatesensor_connection_type: "WiFi"
+  ultimatesensor_connection_type: "Ethernet"
 
 
 # Esphome start
@@ -35,32 +35,20 @@ api:
 ota:
 
 dashboard_import:
-  package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-wifi-complete.yaml@main
-
-
-wifi:
-  # ssid: !secret wifi_ssid
-  # password: !secret wifi_password
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: ${device_name}
-    password: ${device_name}
-
-# Fallback hotspot
-captive_portal:
+  package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml@main
     
 #Enable web server so you can view data in browser if you go to ip of the device
 web_server:
   port: 80
 
-# ethernet:
-#   type: LAN8720
-#   mdc_pin: GPIO23
-#   mdio_pin: GPIO18
-#   clk_mode: GPIO17_OUT
-#   phy_addr: 1
-#   power_pin: GPIO16  
+#Enable Ethernet port and disable WiFi
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  phy_addr: 1
+  power_pin: GPIO16  
 
 # Enable I2C
 i2c:
@@ -889,15 +877,6 @@ button:
     name: "Restart UltimateSensor"
 
 text_sensor:
-  # WiFi info
-  - platform: wifi_info
-    ip_address:
-      name: "IP address"
-      icon: "mdi:network-outline"
-    ssid:
-      name: "Connected SSID"
-    bssid:
-      name: "Connected BSSID"  
   # ESPHome information
   - platform: version
     id: text_sensor_version
