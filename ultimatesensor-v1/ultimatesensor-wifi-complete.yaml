@@ -7,7 +7,7 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-  ultimatesensor_software_version: "1.0"
+  ultimatesensor_software_version: "1.1"
   ultimatesensor_hardware_version: "V1-Complete"
   ultimatesensor_connection_type: "WiFi"
 
@@ -33,6 +33,7 @@ api:
 
 #Enable Over the Air updates
 ota:
+  - platform: esphome
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-wifi-complete.yaml@main
