@@ -30,6 +30,12 @@ logger:
 
 # Enable Home Assistant API
 api:
+  actions:
+    - action: set_ambient_pressure
+      variables:
+        pressure_mbar: int
+      then:
+        - lambda: "id(scd41)->set_ambient_pressure_compensation(pressure_mbar);"
 
 #Enable Over the Air updates
 ota:
@@ -130,6 +136,7 @@ display:
 sensor:
   # SCD41
   - platform: scd4x
+    id: scd41
     co2:
       name: "SCD41 CO2"
       id: scd41_co2
