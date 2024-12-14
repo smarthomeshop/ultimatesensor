@@ -891,10 +891,18 @@ number:
     initial_value: 15
     disabled_by_default: true
 
-#Restart button
+#Restart and Calibration button
 button:
   - platform: restart
     name: "Restart UltimateSensor"
+  - platform: template
+    name: "CO2 manual calibration"
+    entity_category: "config"
+    on_press:
+      then:
+      - scd4x.perform_forced_calibration:
+          value: 419
+          id: scd41
 
 text_sensor:
   # WiFi info
