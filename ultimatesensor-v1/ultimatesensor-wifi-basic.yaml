@@ -7,7 +7,7 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-  ultimatesensor_software_version: "1.1"
+  ultimatesensor_software_version: "1.2"
   ultimatesensor_hardware_version: "V1-Basic"
   ultimatesensor_connection_type: "WiFi"
 
@@ -16,6 +16,7 @@ substitutions:
 esphome:
   name: ultimatesensor
   friendly_name: ultimatesensor
+  name_add_mac_suffix: true
   project:
     name: "smarthomeshop.ultimatesensor"
     version: ${ultimatesensor_software_version}
