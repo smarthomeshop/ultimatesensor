@@ -90,6 +90,7 @@ display:
   - platform: ssd1306_i2c
     model: "SSD1306 128x64"
     address: 0x3C
+    id: oled_display
     contrast: 40%
     lambda: |-
       // Display the CO2 measurement
@@ -845,6 +846,20 @@ number:
 button:
   - platform: restart
     name: "Restart UltimateSensor"
+
+switch:
+  - platform: template
+    name: "LCD Display"
+    id: lcd_display_switch
+    icon: "mdi:monitor"
+    restore_mode: RESTORE_DEFAULT_ON
+    optimistic: true
+    turn_on_action:
+      - lambda: |-
+          id(oled_display).turn_on();
+    turn_off_action:
+      - lambda: |-
+          id(oled_display).turn_off();
 
 text_sensor:
   # WiFi info
