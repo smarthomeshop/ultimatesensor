@@ -20,6 +20,15 @@ esphome:
   project:
     name: "smarthomeshop.ultimatesensor"
     version: ${ultimatesensor_software_version}
+  on_boot:
+    priority: -100  # Run after all components are initialized
+    then:
+      - delay: 5s  # Wait for sensor to initialize
+      - if:
+          condition:
+            lambda: 'return !id(pm_sensor_enabled);'
+          then:
+            - sps30.stop_measurement: pm_sensor
 
 esp32:
   board: esp32dev
@@ -908,14 +917,12 @@ switch:
       - globals.set:
           id: pm_sensor_enabled
           value: 'true'
-      - lambda: |-
-          id(pm_sensor).set_update_interval(120000);
+      - sps30.start_measurement: pm_sensor
     turn_off_action:
       - globals.set:
           id: pm_sensor_enabled
           value: 'false'
-      - lambda: |-
-          id(pm_sensor).set_update_interval(4294967295);
+      - sps30.stop_measurement: pm_sensor
   - platform: template
     name: "Night Mode"
     id: night_mode_switch
