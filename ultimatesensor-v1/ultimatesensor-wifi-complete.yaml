@@ -7,10 +7,9 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-  ultimatesensor_software_version: "1.2"
+  ultimatesensor_software_version: "1.3"
   ultimatesensor_hardware_version: "V1-Complete"
   ultimatesensor_connection_type: "WiFi"
-
 
 # Esphome start
 esphome:
@@ -45,10 +44,9 @@ ota:
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-wifi-complete.yaml@main
 
-
 wifi:
-  # ssid: !secret wifi_ssid
-  # password: !secret wifi_password
+  #ssid: !secret wifi_ssid
+  #password: !secret wifi_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -103,21 +101,21 @@ font:
 
 display:
   - platform: ssd1306_i2c
+    id: ssd1306_i2c_display
     model: "SSD1306 128x64"
     address: 0x3C
-    contrast: 40%
+    contrast: 0.4
     lambda: |-
+      id(ssd1306_i2c_display).set_contrast(id(display_contrast));
       // Display the CO2 measurement
       if (id(scd41_co2).has_state()) {
         it.printf(0, 10, id(font1), "%.0f", id(scd41_co2).state);
       }
       it.print(0, 0, id(font2), "CO2");
-      
       // Display the Temperature
       if (id(scd41_temperature).has_state()) {
         it.printf(100, 0, id(font3), "%.0f°C", id(scd41_temperature).state);
       }
-      
       // Display the Humidity
       if (id(scd41_humidity).has_state()) {
         it.printf(100, 20, id(font3), "%.0f%%", id(scd41_humidity).state);
@@ -130,9 +128,7 @@ display:
       if (id(pir_sensor).state) {
         //it.draw_bitmap(0, 30, 16, 16, id(stick_figure_bitmap));
         it.printf(30, 0, id(font2), "PIR");
-
       }
-
 
 sensor:
   # SCD41
@@ -348,7 +344,10 @@ globals:
     type: unsigned long
     restore_value: no
     initial_value: '0'
-
+  - id: display_contrast
+    type: float
+    restore_value: yes
+    initial_value: "0.4"
 
 uart:
   id: uart_bus
@@ -892,7 +891,7 @@ number:
     initial_value: 15
     disabled_by_default: true
 
-#Restart and Calibration button
+# Restart and Calibration button
 button:
   - platform: restart
     name: "Restart UltimateSensor"
@@ -904,6 +903,24 @@ button:
       - scd4x.perform_forced_calibration:
           value: 419
           id: scd41
+
+# Switch to enable/disable the display by changing the contrast
+switch:
+  - platform: template
+    name: "Display"
+    id: display_switch
+    icon: "mdi:monitor"
+    restore_mode : RESTORE_DEFAULT_ON
+    lambda: |-
+      return id(display_contrast) > 0.0f;
+    turn_on_action:
+      - globals.set:
+          id: display_contrast 
+          value: "0.4"
+    turn_off_action:
+      - globals.set:
+          id: display_contrast
+          value: "0.0"
 
 text_sensor:
   # WiFi info
