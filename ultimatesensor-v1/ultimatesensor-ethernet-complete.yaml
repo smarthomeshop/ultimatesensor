@@ -7,7 +7,7 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-  ultimatesensor_software_version: "1.2"
+  ultimatesensor_software_version: "1.3"
   ultimatesensor_hardware_version: "V1-Complete"
   ultimatesensor_connection_type: "Ethernet"
 
@@ -87,6 +87,7 @@ display:
   - platform: ssd1306_i2c
     model: "SSD1306 128x64"
     address: 0x3C
+    id: oled_display
     contrast: 40%
     lambda: |-
       // Display the CO2 measurement
@@ -147,6 +148,7 @@ sensor:
 
   # SPS30 (For complete version)
   - platform: sps30
+    id: pm_sensor
     pm_1_0:
       name: "PM <1µm Weight concentration"
       id: "workshop_PM_1_0"
@@ -329,6 +331,10 @@ globals:
     type: unsigned long
     restore_value: no
     initial_value: '0'
+  - id: pm_sensor_enabled
+    type: bool
+    restore_value: yes
+    initial_value: 'true'
 
 
 uart:
@@ -877,6 +883,55 @@ number:
 button:
   - platform: restart
     name: "Restart UltimateSensor"
+
+switch:
+  - platform: template
+    name: "LCD Display"
+    id: lcd_display_switch
+    icon: "mdi:monitor"
+    restore_mode: RESTORE_DEFAULT_ON
+    optimistic: true
+    turn_on_action:
+      - lambda: |-
+          id(oled_display).turn_on();
+    turn_off_action:
+      - lambda: |-
+          id(oled_display).turn_off();
+  - platform: template
+    name: "PM Sensor"
+    id: pm_sensor_switch
+    icon: "mdi:air-filter"
+    restore_mode: RESTORE_DEFAULT_ON
+    lambda: |-
+      return id(pm_sensor_enabled);
+    turn_on_action:
+      - globals.set:
+          id: pm_sensor_enabled
+          value: 'true'
+      - lambda: |-
+          // Send I2C command to start continuous measurement (0x0010 with arg 0x0300)
+          uint8_t start_cmd[] = {0x00, 0x10, 0x03, 0x00, 0xAC};
+          id(bus_a).write(0x69, start_cmd, 5);
+    turn_off_action:
+      - globals.set:
+          id: pm_sensor_enabled
+          value: 'false'
+      - lambda: |-
+          // Send I2C command to stop measurement (0x0104)
+          uint8_t stop_cmd[] = {0x01, 0x04};
+          id(bus_a).write(0x69, stop_cmd, 2);
+  - platform: template
+    name: "Night Mode"
+    id: night_mode_switch
+    icon: "mdi:weather-night"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: lcd_display_switch
+      - switch.turn_off: pm_sensor_switch
+    turn_off_action:
+      - switch.turn_on: lcd_display_switch
+      - switch.turn_on: pm_sensor_switch
 
 text_sensor:
   # ESPHome information
