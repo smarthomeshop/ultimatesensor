@@ -1,1 +1,9 @@
+# Secrets
+secrets.yaml
+
+# Build artifacts
+.esphome/
+*.bin
+
+# macOS
 **/.DS_Store

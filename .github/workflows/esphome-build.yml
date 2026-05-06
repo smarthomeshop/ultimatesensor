@@ -1,0 +1,180 @@
+name: Build ESPHome firmware
+
+on:
+  workflow_call:
+    inputs:
+      files:
+        description: Comma-separated list of files to build.
+        required: true
+        type: string
+      name:
+        description: Name of the firmware to publish.
+        required: false
+        type: string
+        default: UltimateSensor
+      clean:
+        description: Remove deleted files from the build.
+        required: false
+        type: boolean
+        default: true
+      manifest_filename:
+        description: Filename of the manifest to write when publishing directly.
+        required: false
+        type: string
+        default: manifest.json
+      esphome_version:
+        description: Version of ESPHome to build for.
+        required: false
+        type: string
+        default: latest
+      directory_name:
+        description: Name of the output folder.
+        required: true
+        type: string
+        default: esp32
+      software_version:
+        description: Explicit UltimateSensor software version to inject before building.
+        required: false
+        type: string
+        default: ""
+      version_file:
+        description: YAML file where ultimatesensor_software_version should be injected. Defaults to the matrix file.
+        required: false
+        type: string
+        default: ""
+      deploy_to_pages:
+        description: Whether this reusable workflow should publish to gh-pages directly.
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.files-array.outputs.files }}
+    steps:
+      - id: files-array
+        shell: bash
+        run: |
+          files=$(echo "${{ inputs.files }}" | jq -Rcn 'inputs | . / ","')
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ESPHome binary for ${{ matrix.file }}
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file: ${{ fromJson(needs.prepare.outputs.files) }}
+    outputs:
+      esphome-version: ${{ steps.esphome-build.outputs.esphome-version }}
+      esphome-build-name: ${{ steps.esphome-build.outputs.name }}
+      project-version: ${{ steps.esphome-build.outputs.project-version }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compute version and inject into YAML
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${{ inputs.software_version }}" ]]; then
+            VERSION="${{ inputs.software_version }}"
+            echo "Using workflow provided VERSION=$VERSION"
+          elif [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" =~ ^v[0-9]+(\.[0-9]+)*$ ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            echo "Using tag VERSION=$VERSION"
+          else
+            SHORTSHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+            VERSION="dev-${SHORTSHA}"
+            echo "Using fallback VERSION=$VERSION"
+          fi
+
+          VERSION_FILE="${{ inputs.version_file }}"
+          if [[ -z "$VERSION_FILE" ]]; then
+            VERSION_FILE="${{ matrix.file }}"
+          fi
+
+          if [[ ! -f "$VERSION_FILE" ]]; then
+            echo "::error file=${VERSION_FILE}::Version file not found."
+            exit 1
+          fi
+
+          if ! grep -q 'ultimatesensor_software_version:' "$VERSION_FILE"; then
+            echo "::error file=${VERSION_FILE}::ultimatesensor_software_version not found."
+            exit 1
+          fi
+
+          sed -i "s/^\s*ultimatesensor_software_version: \".*\"/  ultimatesensor_software_version: \"${VERSION}\"/" "$VERSION_FILE"
+
+      - name: Create dummy secrets for build
+        shell: bash
+        run: |
+          DIR=$(dirname "${{ matrix.file }}")
+          mkdir -p "$DIR"
+          printf 'wifi_ssid: "DUMMY"\nwifi_password: "DUMMYPASS"\n' > "$DIR/secrets.yaml"
+
+      - uses: esphome/build-action@v6
+        id: esphome-build
+        with:
+          yaml-file: ${{ matrix.file }}
+          version: ${{ inputs.esphome_version }}
+
+      - name: Collect outputs
+        shell: bash
+        run: |
+          mkdir output
+          mv "${{ steps.esphome-build.outputs.name }}" temp
+          mv temp "${{ inputs.directory_name }}"
+          mv "${{ inputs.directory_name }}" output/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}
+          path: output
+
+  publish:
+    if: inputs.deploy_to_pages && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    name: Publish firmware to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: [build]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: output
+          name: ${{ inputs.name }}
+
+      - name: Create single manifest.json
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MANIFEST_FILE=$(find output -name "manifest.json" -type f | head -1)
+          if [[ -z "$MANIFEST_FILE" ]]; then
+            echo "ERROR: No manifest.json found in output directory"
+            exit 1
+          fi
+
+          jq -s '{"name": "${{ inputs.name }}", "version": "${{ needs.build.outputs.project-version }}", "home_assistant_domain": "esphome", "new_install_skip_erase": false, "builds":.}' "$MANIFEST_FILE" \
+            > output/${{ inputs.manifest_filename }}
+          jq --arg dir "${{ inputs.directory_name }}" '
+            .builds[].ota.path |= "\($dir)/\(.)" |
+            .builds[].parts[].path |= "\($dir)/\(.)"
+          ' \
+            output/${{ inputs.manifest_filename }} \
+            > output/manifest_temp.json
+          mv output/manifest_temp.json output/${{ inputs.manifest_filename }}
+
+      - name: Deploy firmware
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: output
+          clean: ${{ inputs.clean }}
+          force: false
+          attempt-limit: 6

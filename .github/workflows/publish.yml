@@ -1,0 +1,575 @@
+name: Build and Publish UltimateSensor firmware
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      force_all:
+        description: "Force build all variants"
+        required: false
+        type: boolean
+        default: false
+  # Scheduled build: rebuild all firmware monthly with latest ESPHome.
+  # ESPHome releases typically land around the 15th, so we rebuild on the
+  # 20th to pick up the new release a few days later after initial fixes.
+  schedule:
+    - cron: "0 3 20 * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "CHANGELOG.md"
+      - ".github/workflows/**"
+      - "ultimatesensor-v1/**"
+
+permissions:
+  contents: write
+
+jobs:
+  validate-changelog:
+    name: Validate changelog updates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Require changelog update for firmware changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" != "pull_request" && "${{ github.event_name }}" != "push" ]]; then
+            echo "Event does not require changelog validation"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.actor }}" == "github-actions[bot]" ]]; then
+            echo "Skipping changelog validation for GitHub Actions version bump commit"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+            BASE_SHA=${{ github.event.before }}
+            HEAD_SHA=${{ github.sha }}
+          fi
+
+          if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "First push detected; skipping changelog validation"
+            exit 0
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if ! echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$'; then
+            echo "No firmware YAML changes detected; changelog update not required"
+            exit 0
+          fi
+
+          if echo "$CHANGED_FILES" | grep -qx 'CHANGELOG.md'; then
+            echo "CHANGELOG.md updated"
+            exit 0
+          fi
+
+          echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing CHANGELOG.md update."
+          exit 1
+
+  detect-changes:
+    name: Detect changed versions
+    needs: [validate-changelog]
+    runs-on: ubuntu-latest
+    outputs:
+      v1_changed: ${{ steps.changes.outputs.v1 }}
+      v1_build: ${{ steps.changes.outputs.v1_build }}
+      v1_version: ${{ steps.versions.outputs.v1_version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for changes in each version
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_all }}" == "true" ]]; then
+            echo "Force building all variants"
+            echo "v1=true" >> "$GITHUB_OUTPUT"
+            echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "Scheduled build - rebuilding all variants with latest ESPHome"
+            echo "v1=true" >> "$GITHUB_OUTPUT"
+            echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "Tag detected, building all variants"
+            echo "v1=true" >> "$GITHUB_OUTPUT"
+            echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+            HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          else
+            BASE_SHA=${{ github.event.before }}
+            HEAD_SHA=${{ github.sha }}
+          fi
+
+          if [[ "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "First push detected, building all variants"
+            echo "v1=true" >> "$GITHUB_OUTPUT"
+            echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          V1_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$' && echo "true" || echo "false")
+          WORKFLOW_CHANGED=$(echo "$CHANGED_FILES" | grep -q '^.github/workflows/' && echo "true" || echo "false")
+
+          if [[ "$WORKFLOW_CHANGED" == "true" ]]; then
+            echo "Workflow changes detected; rebuilding all variants while preserving real firmware change detection"
+          fi
+
+          echo "v1=$V1_CHANGED" >> "$GITHUB_OUTPUT"
+          if [[ "$WORKFLOW_CHANGED" == "true" ]]; then
+            echo "v1_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "v1_build=$V1_CHANGED" >> "$GITHUB_OUTPUT"
+          fi
+          echo "V1 changed: $V1_CHANGED"
+
+      - name: Update version numbers for changed versions
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+          VERSION_FILE="ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
+
+          update_version() {
+            local version_file=$1
+            local output_name=$2
+
+            if [[ ! -f "$version_file" ]]; then
+              echo "${output_name}=1.0" >> "$GITHUB_OUTPUT"
+              return
+            fi
+
+            current_version=$(grep "ultimatesensor_software_version:" "$version_file" | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
+            echo "Current version for $version_file: $current_version"
+
+            if [[ "$IS_SCHEDULED" == "true" ]]; then
+              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
+              echo "Scheduled build - keeping version: $current_version"
+              return
+            fi
+
+            if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
+              echo "Tag build - keeping version: $current_version"
+              return
+            fi
+
+            if [[ "$current_version" =~ ^([0-9]+)\.([0-9]+)(.*)$ ]]; then
+              major="${BASH_REMATCH[1]}"
+              minor="${BASH_REMATCH[2]}"
+              suffix="${BASH_REMATCH[3]}"
+              new_minor=$((minor + 1))
+              new_version="${major}.${new_minor}${suffix}"
+            else
+              shortsha=$(echo "${GITHUB_SHA}" | cut -c1-7)
+              new_version="dev-${shortsha}"
+            fi
+
+            echo "${output_name}=${new_version}" >> "$GITHUB_OUTPUT"
+            echo "New version for $version_file: $new_version"
+          }
+
+          if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+            update_version "$VERSION_FILE" "v1_version"
+          else
+            v1_current=$(grep "ultimatesensor_software_version:" "$VERSION_FILE" 2>/dev/null | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/' || echo "1.0")
+            echo "v1_version=$v1_current" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit version updates and create tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version_files=(
+            "ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
+            "ultimatesensor-v1/ultimatesensor-wifi-complete.yaml"
+            "ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml"
+            "ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml"
+          )
+
+          finalize_changelog() {
+            local unreleased_notes
+            local release_blocks
+            local release_date
+
+            unreleased_notes=$(mktemp)
+            release_blocks=$(mktemp)
+            release_date=$(TZ=Europe/Amsterdam date +%Y-%m-%d)
+
+            awk '
+              $0 == "## [Unreleased]" { found=1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md \
+              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+              > "$unreleased_notes"
+
+            if ! grep -q '[^[:space:]]' "$unreleased_notes"; then
+              echo "No unreleased changelog notes to finalize"
+              rm -f "$unreleased_notes" "$release_blocks"
+              return
+            fi
+
+            if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+              {
+                printf '## [UltimateSensor V1 %s] - %s\n\n' "${{ steps.versions.outputs.v1_version }}" "$release_date"
+                cat "$unreleased_notes"
+                printf '\n'
+              } >> "$release_blocks"
+            fi
+
+            awk -v blocks_file="$release_blocks" '
+              BEGIN { in_unreleased=0 }
+              $0 == "## [Unreleased]" {
+                print
+                print ""
+                print "- Add customer-facing firmware notes here before merging a PR."
+                print ""
+                while ((getline line < blocks_file) > 0) {
+                  print line
+                }
+                in_unreleased=1
+                next
+              }
+              in_unreleased && /^## \[/ {
+                in_unreleased=0
+                print
+                next
+              }
+              in_unreleased { next }
+              { print }
+            ' CHANGELOG.md > CHANGELOG.md.tmp
+
+            mv CHANGELOG.md.tmp CHANGELOG.md
+            rm -f "$unreleased_notes" "$release_blocks"
+          }
+
+          create_tag() {
+            local tag_name=$1
+
+            if git rev-parse "$tag_name" >/dev/null 2>&1; then
+              echo "Tag $tag_name already exists, skipping"
+              return
+            fi
+
+            echo "Creating tag: $tag_name"
+            git tag -a "$tag_name" -m "Release $tag_name"
+            git push origin "$tag_name"
+          }
+
+          changes_made=false
+
+          if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+            for version_file in "${version_files[@]}"; do
+              sed -i "s/^\s*ultimatesensor_software_version: \".*\"/  ultimatesensor_software_version: \"${{ steps.versions.outputs.v1_version }}\"/" "$version_file"
+            done
+            changes_made=true
+          fi
+
+          if [[ "$changes_made" == "true" ]]; then
+            finalize_changelog
+          fi
+
+          if [[ "$changes_made" == "true" ]] && ! git diff --quiet; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add CHANGELOG.md "${version_files[@]}"
+
+            msg="chore: update versions V1=${{ steps.versions.outputs.v1_version }} [skip ci]"
+
+            git commit -m "$msg" || exit 0
+            git push || echo "Nothing to push"
+
+            if [[ ! "${{ steps.versions.outputs.v1_version }}" =~ ^dev- ]]; then
+              create_tag "ultimatesensor-v1-${{ steps.versions.outputs.v1_version }}"
+            fi
+          fi
+
+  build-ultimatesensor-wifi-basic:
+    name: Build UltimateSensor WiFi Basic
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-wifi-basic.yaml
+      name: UltimateSensor WiFi Basic
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-wifi-basic
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-wifi-complete:
+    name: Build UltimateSensor WiFi Complete
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-wifi-complete.yaml
+      name: UltimateSensor WiFi Complete
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-wifi-complete
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-ethernet-basic:
+    name: Build UltimateSensor Ethernet Basic
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml
+      name: UltimateSensor Ethernet Basic
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-ethernet-basic
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-ethernet-complete:
+    name: Build UltimateSensor Ethernet Complete
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml
+      name: UltimateSensor Ethernet Complete
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-ethernet-complete
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  publish-gh-pages:
+    name: Publish firmware to GitHub Pages
+    needs:
+      - detect-changes
+      - build-ultimatesensor-wifi-basic
+      - build-ultimatesensor-wifi-complete
+      - build-ultimatesensor-ethernet-basic
+      - build-ultimatesensor-ethernet-complete
+    if: |
+      always() &&
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main' &&
+      (
+        needs.build-ultimatesensor-wifi-basic.result == 'success' ||
+        needs.build-ultimatesensor-wifi-complete.result == 'success' ||
+        needs.build-ultimatesensor-ethernet-basic.result == 'success' ||
+        needs.build-ultimatesensor-ethernet-complete.result == 'success'
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Download WiFi Basic artifact
+        if: needs.build-ultimatesensor-wifi-basic.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor WiFi Basic
+          path: output
+
+      - name: Download WiFi Complete artifact
+        if: needs.build-ultimatesensor-wifi-complete.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor WiFi Complete
+          path: output
+
+      - name: Download Ethernet Basic artifact
+        if: needs.build-ultimatesensor-ethernet-basic.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor Ethernet Basic
+          path: output
+
+      - name: Download Ethernet Complete artifact
+        if: needs.build-ultimatesensor-ethernet-complete.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor Ethernet Complete
+          path: output
+
+      - name: Create manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          create_manifest() {
+            local variant_dir=$1
+            local manifest_name=$2
+            local display_name=$3
+            local version=$4
+            local manifest_file="output/${variant_dir}/manifest.json"
+
+            if [[ ! -f "$manifest_file" ]]; then
+              echo "Skipping ${variant_dir}; manifest.json not found"
+              return
+            fi
+
+            jq --arg dir "$variant_dir" --arg name "$display_name" --arg version "$version" '{
+              "name": $name,
+              "version": $version,
+              "home_assistant_domain": "esphome",
+              "new_install_skip_erase": false,
+              "builds": [.]
+            } |
+            .builds[0].ota.path = ($dir + "/" + .builds[0].ota.path) |
+            .builds[0].parts[].path = ($dir + "/" + .builds[0].parts[].path)' \
+              "$manifest_file" > "output/${manifest_name}"
+          }
+
+          create_manifest "ultimatesensor-wifi-basic" "ultimatesensor-wifi-basic-manifest.json" "UltimateSensor WiFi Basic" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-wifi-complete" "ultimatesensor-wifi-complete-manifest.json" "UltimateSensor WiFi Complete" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-ethernet-basic" "ultimatesensor-ethernet-basic-manifest.json" "UltimateSensor Ethernet Basic" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-ethernet-complete" "ultimatesensor-ethernet-complete-manifest.json" "UltimateSensor Ethernet Complete" "${{ needs.detect-changes.outputs.v1_version }}"
+
+      - name: Create README for gh-pages
+        shell: bash
+        run: |
+          cat > output/README.md <<'README_EOF'
+          # UltimateSensor firmware - GitHub Pages branch (gh-pages)
+
+          This branch hosts the public firmware artifacts and manifests for UltimateSensor.
+          It is served via GitHub Pages and is intended to be consumed by:
+          - ESP Web Tools (browser-based flashing)
+          - OTA update integrations (using the JSON manifest)
+
+          ## Do not edit manually
+          Files in this branch are generated by the CI workflow in the default branch.
+          Any manual changes will be overwritten on the next publish.
+
+          ## Layout
+          - `ultimatesensor-wifi-basic/`
+          - `ultimatesensor-wifi-complete/`
+          - `ultimatesensor-ethernet-basic/`
+          - `ultimatesensor-ethernet-complete/`
+          - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
+
+          ## OTA update manifests
+          Example URLs:
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic/manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete/manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic/manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete/manifest.json`
+
+          Aggregate URLs:
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete-manifest.json`
+
+          ## How this branch is updated
+          On pushes to the default branch, or when manually dispatched, the CI pipeline:
+          1. builds all variants with ESPHome
+          2. exports firmware and per-variant manifests
+          3. writes aggregate manifests
+          4. deploys this folder structure to the `gh-pages` branch
+          README_EOF
+
+      - name: Debug output structure
+        run: find output -maxdepth 2 -type f | sort
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: output
+          clean: false
+          force: false
+          attempt-limit: 6
+
+  create-releases:
+    name: Create GitHub releases
+    needs: [detect-changes]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Create releases for changed hardware versions
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          create_release() {
+            local tag_name=$1
+            local title=$2
+            local heading="## [${title}]"
+
+            if gh release view "$tag_name" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Release $tag_name already exists, skipping"
+              return
+            fi
+
+            awk -v heading="$heading" '
+              $0 == heading { found=1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md > release-notes.txt
+
+            if [[ ! -s release-notes.txt ]]; then
+              awk '
+                $0 == "## [Unreleased]" { found=1; next }
+                found && /^## \[/ { exit }
+                found { print }
+              ' CHANGELOG.md > release-notes.txt
+            fi
+
+            if [[ ! -s release-notes.txt ]]; then
+              printf '%s\n\n%s\n' \
+                "Customer-facing firmware notes live in CHANGELOG.md." \
+                "Changelog: https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md" \
+                > release-notes.txt
+            fi
+
+            gh release create "$tag_name" \
+              -R "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --title "$title" \
+              --notes-file release-notes.txt
+          }
+
+          if [[ "${{ needs.detect-changes.outputs.v1_changed }}" == "true" && ! "${{ needs.detect-changes.outputs.v1_version }}" =~ ^dev- ]]; then
+            create_release "ultimatesensor-v1-${{ needs.detect-changes.outputs.v1_version }}" "UltimateSensor V1 ${{ needs.detect-changes.outputs.v1_version }}"
+          fi

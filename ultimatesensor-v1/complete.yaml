@@ -1,0 +1,63 @@
+# Complete variant configuration
+# Adds the SPS30 particulate matter sensor and PM/night-mode controls.
+
+sensor:
+  # SPS30 (For complete version)
+  - platform: sps30
+    id: pm_sensor
+    pm_1_0:
+      name: "PM <1µm Weight concentration"
+      id: "workshop_PM_1_0"
+    pm_2_5:
+      name: "PM <2.5µm Weight concentration"
+      id: "workshop_PM_2_5"
+    pm_4_0:
+      name: "PM <4µm Weight concentration"
+      id: "workshop_PM_4_0"
+    pm_10_0:
+      name: "PM <10µm Weight concentration"
+      id: "workshop_PM_10_0"
+    pmc_0_5:
+      name: "PM <0.5µm Number concentration"
+      id: "workshop_PMC_0_5"
+    pmc_1_0:
+      name: "PM <1µm Number concentration"
+      id: "workshop_PMC_1_0"
+    pmc_2_5:
+      name: "PM <2.5µm Number concentration"
+      id: "workshop_PMC_2_5"
+    pmc_4_0:
+      name: "PM <4µm Number concentration"
+      id: "workshop_PMC_4_0"
+    pmc_10_0:
+      name: "PM <10µm Number concentration"
+      id: "workshop_PMC_10_0"
+    pm_size:
+      name: "Typical Particle size"
+      id: "pm_size"
+    address: 0x69
+    update_interval: 120s
+
+switch:
+  - platform: template
+    name: "PM Sensor"
+    id: pm_sensor_switch
+    icon: "mdi:air-filter"
+    restore_mode: RESTORE_DEFAULT_ON
+    optimistic: true
+    turn_on_action:
+      - sps30.start_measurement: pm_sensor
+    turn_off_action:
+      - sps30.stop_measurement: pm_sensor
+  - platform: template
+    name: "Night Mode"
+    id: night_mode_switch
+    icon: "mdi:weather-night"
+    restore_mode: RESTORE_DEFAULT_OFF
+    optimistic: true
+    turn_on_action:
+      - switch.turn_off: lcd_display_switch
+      - switch.turn_off: pm_sensor_switch
+    turn_off_action:
+      - switch.turn_on: lcd_display_switch
+      - switch.turn_on: pm_sensor_switch
