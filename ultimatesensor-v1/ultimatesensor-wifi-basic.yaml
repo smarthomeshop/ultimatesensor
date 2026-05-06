@@ -5,7 +5,7 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-  ultimatesensor_software_version: "1.6"
+  ultimatesensor_software_version: "1.7"
   ultimatesensor_hardware_version: "V1-Basic"
   ultimatesensor_connection_type: "WiFi"
   wifi_fast_connect: "true"
