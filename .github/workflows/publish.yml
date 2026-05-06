@@ -72,8 +72,24 @@ jobs:
           fi
 
           if echo "$CHANGED_FILES" | grep -qx 'CHANGELOG.md'; then
-            echo "CHANGELOG.md updated"
-            exit 0
+            unreleased_notes=$(mktemp)
+            awk '
+              $0 == "## [Unreleased]" { found=1; next }
+              found && /^## \[/ { exit }
+              found { print }
+            ' CHANGELOG.md \
+              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+              > "$unreleased_notes"
+
+            if grep -q '[^[:space:]]' "$unreleased_notes"; then
+              echo "CHANGELOG.md updated with Unreleased notes"
+              rm -f "$unreleased_notes"
+              exit 0
+            fi
+
+            rm -f "$unreleased_notes"
+            echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing note under ## [Unreleased]."
+            exit 1
           fi
 
           echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing CHANGELOG.md update."

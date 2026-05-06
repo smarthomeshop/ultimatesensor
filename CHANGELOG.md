@@ -8,14 +8,27 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 - Add customer-facing firmware notes here before merging a PR.
 
-## [UltimateSensor V1 1.5] - 2026-05-06
+## [UltimateSensor V1 1.7] - 2026-05-06
 
+### Changed
 
-- Added automated firmware builds, GitHub Pages firmware manifests, GitHub Releases, and changelog validation for future releases.
-- Reworked the firmware repository into shared ESPHome packages so the WiFi/Ethernet and Basic/Complete variants stay easier to maintain consistently.
-- CO2 ambient pressure compensation and manual calibration controls are now part of the shared base firmware for all variants.
 - Aligned Complete variant SPS30 measurement behavior with UltimateSensor Mini, including 60-second default updates, SPS30 idle-cycle controls, and matching PM sensor IDs.
 
+## [UltimateSensor V1 1.6] - 2026-05-06
+
+### Changed
+
+- CO2 ambient pressure compensation and manual calibration controls are now part of the shared base firmware for all variants.
+
+## [UltimateSensor V1 1.5] - 2026-05-06
+
+### Added
+
+- Added automated firmware builds, GitHub Pages firmware manifests, GitHub Releases, and changelog validation for future releases.
+
+### Changed
+
+- Reworked the firmware repository into shared ESPHome packages so the WiFi/Ethernet and Basic/Complete variants stay easier to maintain consistently.
 
 ## [UltimateSensor V1 1.4] - 2026-05-06
 
