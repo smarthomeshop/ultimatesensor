@@ -85,7 +85,6 @@ ultimatesensor/
 │   ├── wifi.yaml                       # Shared WiFi connectivity package
 │   ├── ethernet.yaml                   # Shared Ethernet connectivity package
 │   ├── complete.yaml                   # SPS30 particulate matter package
-│   ├── co2-calibration.yaml            # Optional CO2 calibration controls
 │   ├── ultimatesensor-wifi-basic.yaml
 │   ├── ultimatesensor-wifi-complete.yaml
 │   ├── ultimatesensor-ethernet-basic.yaml

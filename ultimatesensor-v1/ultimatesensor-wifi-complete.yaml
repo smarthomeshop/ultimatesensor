@@ -14,7 +14,6 @@ packages:
   base: !include base.yaml
   net: !include wifi.yaml
   variant: !include complete.yaml
-  calibration: !include co2-calibration.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-wifi-complete.yaml@main
