@@ -6,8 +6,14 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 1.5] - 2026-05-06
+
+
 - Added automated firmware builds, GitHub Pages firmware manifests, GitHub Releases, and changelog validation for future releases.
 - Reworked the firmware repository into shared ESPHome packages so the WiFi/Ethernet and Basic/Complete variants stay easier to maintain consistently.
+
 
 ## [UltimateSensor V1 1.4] - 2026-05-06
 
