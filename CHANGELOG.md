@@ -6,7 +6,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 1.8] - 2026-05-06
+
+
 - Added native LD2450 Bluetooth, restart, and factory-reset controls while preserving the existing target and zone entities.
+
 
 ## [UltimateSensor V1 1.7] - 2026-05-06
 
