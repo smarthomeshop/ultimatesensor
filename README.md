@@ -24,6 +24,7 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 - WiFi firmware with captive portal fallback
 - Ethernet firmware for wired connectivity and PoE installations
 - Optional SPS30 particulate matter sensing in the Complete variant
+- SPS30 idle-cycle controls aligned with UltimateSensor Mini to reduce fan/laser runtime
 - PM sensor and Night Mode controls in the Complete variant
 - Fully local operation with ESPHome and Home Assistant
 
