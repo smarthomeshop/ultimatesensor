@@ -6,10 +6,16 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V2 1.0] - 2026-05-31
+
+
 - Added UltimateSensor V2 ESP32-S3 firmware variants for WiFi and W5500 Ethernet, with LD2412, LD2450, PIR, I2S microphone, speaker media player, and optional SPS30 particulate matter support.
 - Split UltimateSensor V2 tracking radar support into standard LD2450 packages and optional LD2460 upgrade firmware variants.
 - Documented that LD2412 should remain installed when customers replace the LD2450 module with the optional LD2460 upgrade.
 - Added local wake-word and Home Assistant voice assistant support to UltimateSensor V2 firmware.
+
 
 ## [UltimateSensor V1 1.8] - 2026-05-06
 
