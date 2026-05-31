@@ -14,20 +14,29 @@ Any manual changes will be overwritten on the next publish.
 - `ultimatesensor-wifi-complete/`
 - `ultimatesensor-ethernet-basic/`
 - `ultimatesensor-ethernet-complete/`
+- `ultimatesensor-v2-wifi-basic/`
+- `ultimatesensor-v2-wifi-complete/`
+- `ultimatesensor-v2-ethernet-basic/`
+- `ultimatesensor-v2-ethernet-complete/`
+- `ultimatesensor-v2-wifi-basic-ld2460/`
+- `ultimatesensor-v2-wifi-complete-ld2460/`
+- `ultimatesensor-v2-ethernet-basic-ld2460/`
+- `ultimatesensor-v2-ethernet-complete-ld2460/`
 - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
 
-## OTA update manifests
-Example URLs:
-- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic/manifest.json`
-- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete/manifest.json`
-- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic/manifest.json`
-- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete/manifest.json`
-
-Aggregate URLs:
+## Aggregate manifest URLs
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
 
 ## How this branch is updated
 On pushes to the default branch, or when manually dispatched, the CI pipeline:
