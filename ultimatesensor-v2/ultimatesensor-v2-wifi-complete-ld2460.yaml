@@ -1,0 +1,19 @@
+# UltimateSensor V2 WiFi Complete LD2460 Upgrade Configuration
+# Use only when the standard LD2450 module has been replaced by the optional LD2460 upgrade.
+
+substitutions:
+  device_name: ultimatesensor-v2
+  friendly_name: "UltimateSensor V2"
+  ultimatesensor_hardware_version: "V2-Complete-LD2460"
+  ultimatesensor_connection_type: "WiFi"
+  wifi_fast_connect: "true"
+
+packages:
+  base: !include base.yaml
+  tracking: !include tracking-ld2460.yaml
+  net: !include wifi.yaml
+  voice: !include voice-assistant.yaml
+  variant: !include complete.yaml
+
+dashboard_import:
+  package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460.yaml@main

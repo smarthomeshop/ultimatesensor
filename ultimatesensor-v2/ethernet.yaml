@@ -1,0 +1,44 @@
+# UltimateSensor V2 Ethernet network package.
+# W5500 power is enabled through the board MOSFET before Ethernet starts.
+
+esphome:
+  on_boot:
+    - priority: 800
+      then:
+        - switch.turn_on: eth_power
+        - delay: 500ms
+
+switch:
+  - platform: gpio
+    id: eth_power
+    internal: true
+    restore_mode: ALWAYS_ON
+    pin:
+      number: GPIO47
+      inverted: true
+
+ethernet:
+  type: W5500
+  clk_pin: GPIO21
+  mosi_pin:
+    number: GPIO45
+    ignore_strapping_warning: true
+  miso_pin: GPIO38
+  cs_pin: GPIO41
+  interrupt_pin: GPIO39
+  reset_pin: GPIO40
+  clock_speed: 8MHz
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      id: ethernet_ip_address
+      name: "Ethernet IP Address"
+      entity_category: diagnostic
+    dns_address:
+      name: "Ethernet DNS Address"
+      entity_category: diagnostic
+    mac_address:
+      id: ethernet_mac_address
+      name: "Ethernet MAC Address"
+      entity_category: diagnostic

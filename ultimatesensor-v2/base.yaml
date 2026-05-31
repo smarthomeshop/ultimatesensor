@@ -1,0 +1,446 @@
+# UltimateSensor V2 Base Configuration
+# Shared ESP32-S3 hardware, sensors, radar, PIR, and audio stack for all V2 variants.
+
+substitutions:
+  ultimatesensor_software_version: "1.0"
+  log_level: "INFO"
+  scd41_temperature_offset: "0.0"
+  scd41_humidity_offset: "3.0"
+  speaker_volume: "60%"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+  project:
+    name: "smarthomeshop.ultimatesensor_v2"
+    version: ${ultimatesensor_software_version}
+  min_version: 2026.4.0
+  platformio_options:
+    build_flags: -DBOARD_HAS_PSRAM
+    board_build.flash_mode: dio
+    board_upload.maximum_size: 16777216
+  on_boot:
+    - priority: 600
+      then:
+        - media_player.volume_set:
+            id: media_player_01
+            volume: ${speaker_volume}
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240: "y"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+  baud_rate: 0
+  level: ${log_level}
+  logs:
+    sensor: WARN
+    binary_sensor: WARN
+    ld2412: WARN
+    ld2450: WARN
+
+api:
+  actions:
+    - action: set_ambient_pressure
+      variables:
+        pressure_mbar: int
+      then:
+        - lambda: "id(scd41)->set_ambient_pressure_compensation(pressure_mbar);"
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+
+web_server:
+  port: 80
+
+status_led:
+  pin: GPIO19
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: rgb_front_led
+    name: "Front LED"
+    pin: GPIO20
+    num_leds: 3
+    chipset: ws2812
+    rgb_order: GRB
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 0s
+    rmt_symbols: 96
+    effects:
+      - addressable_color_wipe:
+          name: "Connecting"
+          colors:
+            - red: 60%
+              green: 60%
+              blue: 60%
+              num_leds: 3
+            - red: 60%
+              green: 60%
+              blue: 0%
+              num_leds: 3
+          add_led_interval: 100ms
+          reverse: true
+      - pulse:
+          name: "Slow Pulse"
+          transition_length: 250ms
+          update_interval: 250ms
+          min_brightness: 40%
+          max_brightness: 100%
+      - pulse:
+          name: "Fast Pulse"
+          transition_length: 100ms
+          update_interval: 100ms
+          min_brightness: 40%
+          max_brightness: 100%
+      - addressable_rainbow:
+          name: "Rainbow Flow"
+          speed: 2
+          width: 120
+      - addressable_scan:
+          name: "Wake Sweep"
+          move_interval: 220ms
+          scan_width: 2
+
+i2c:
+  - id: bus_a
+    sda: GPIO10
+    scl: GPIO9
+    scan: true
+    frequency: 100kHz
+
+uart:
+  - id: uart_ld2412
+    tx_pin: GPIO14
+    rx_pin: GPIO13
+    baud_rate: 115200
+    parity: NONE
+    stop_bits: 1
+
+ld2412:
+  id: ld2412_radar
+  uart_id: uart_ld2412
+
+i2s_audio:
+  - id: i2s_in
+    i2s_lrclk_pin: GPIO7
+    i2s_bclk_pin: GPIO16
+  - id: i2s_out
+    i2s_lrclk_pin: GPIO8
+    i2s_bclk_pin: GPIO18
+
+microphone:
+  - platform: i2s_audio
+    id: microphone_01
+    i2s_audio_id: i2s_in
+    i2s_din_pin: GPIO15
+    adc_type: external
+    pdm: false
+    channel: right
+    sample_rate: 16000
+    bits_per_sample: 32bit
+    correct_dc_offset: true
+
+speaker:
+  - platform: i2s_audio
+    id: speaker_output
+    i2s_audio_id: i2s_out
+    i2s_dout_pin: GPIO17
+    dac_type: external
+    sample_rate: 41000
+    bits_per_sample: 16bit
+    channel: mono
+  - platform: mixer
+    id: mixer_speaker_id
+    output_speaker: speaker_output
+    source_speakers:
+      - id: announcement_spk_mixer_input
+      - id: media_spk_mixer_input
+  - platform: resampler
+    id: media_spk_resampling_input
+    output_speaker: media_spk_mixer_input
+  - platform: resampler
+    id: announcement_spk_resampling_input
+    output_speaker: announcement_spk_mixer_input
+
+media_player:
+  - platform: speaker
+    id: media_player_01
+    name: "Media Player"
+    media_pipeline:
+      speaker: media_spk_resampling_input
+      num_channels: 1
+      format: NONE
+    announcement_pipeline:
+      speaker: announcement_spk_resampling_input
+      num_channels: 1
+      format: NONE
+
+sensor:
+  - platform: uptime
+    id: uptime_sensor
+    name: "Uptime"
+    entity_category: diagnostic
+    update_interval: 60s
+
+  - platform: internal_temperature
+    id: cpu_temperature
+    name: "CPU Temperature"
+    entity_category: diagnostic
+    update_interval: 60s
+
+  - platform: sound_level
+    passive: false
+    microphone:
+      microphone: microphone_01
+      channels: [0]
+      gain_factor: 1
+    rms:
+      name: "Microphone RMS"
+    peak:
+      name: "Microphone Peak"
+    measurement_duration: 200ms
+
+  - platform: scd4x
+    id: scd41
+    co2:
+      id: scd41_co2
+      name: "SCD41 CO2"
+    temperature:
+      id: scd41_temperature
+      name: "SCD41 Temperature"
+      filters:
+        - lambda: return x + ${scd41_temperature_offset};
+    humidity:
+      id: scd41_humidity
+      name: "SCD41 Humidity"
+      filters:
+        - lambda: return x + ${scd41_humidity_offset};
+    measurement_mode: low_power_periodic
+    automatic_self_calibration: true
+    update_interval: 30s
+    temperature_offset: ${scd41_temperature_offset}
+
+  - platform: bh1750
+    id: illuminance
+    name: "BH1750 Illuminance"
+    address: 0x23
+    update_interval: 60s
+
+  - platform: sgp4x
+    id: sgp41
+    voc:
+      id: voc_index
+      name: "VOC Index"
+    nox:
+      id: nox_index
+      name: "NOx Index"
+    compensation:
+      humidity_source: scd41_humidity
+      temperature_source: scd41_temperature
+    update_interval: 60s
+
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    moving_distance:
+      name: "LD2412 Moving Distance"
+    still_distance:
+      name: "LD2412 Still Distance"
+    moving_energy:
+      name: "LD2412 Moving Energy"
+    still_energy:
+      name: "LD2412 Still Energy"
+    detection_distance:
+      name: "LD2412 Detection Distance"
+    light:
+      name: "LD2412 Light"
+
+binary_sensor:
+  - platform: status
+    id: api_connection
+    name: "API Connection"
+    device_class: connectivity
+
+  - platform: gpio
+    id: pir_motion
+    name: "PIR Motion"
+    device_class: motion
+    pin:
+      number: GPIO1
+      mode: INPUT
+    filters:
+      - delayed_off: 1s
+
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    has_target:
+      id: ld2412_presence
+      name: "LD2412 Presence"
+      device_class: occupancy
+    has_moving_target:
+      name: "LD2412 Moving Target"
+      device_class: motion
+    has_still_target:
+      name: "LD2412 Still Target"
+      device_class: occupancy
+    dynamic_background_correction_status:
+      name: "LD2412 Dynamic Background Correction"
+      entity_category: diagnostic
+
+  - platform: template
+    id: occupancy
+    name: "Occupancy"
+    device_class: occupancy
+    lambda: |-
+      return id(pir_motion).state || id(ld2412_presence).state || id(tracking_presence).state;
+    filters:
+      - delayed_off: !lambda return id(occupancy_off_delay).state * 1000;
+
+number:
+  - platform: template
+    id: occupancy_off_delay
+    name: "Occupancy Off Delay"
+    entity_category: config
+    unit_of_measurement: "s"
+    min_value: 0
+    max_value: 600
+    step: 1
+    initial_value: 15
+    restore_value: true
+    optimistic: true
+
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    timeout:
+      name: "LD2412 Presence Timeout"
+      entity_category: config
+    min_distance_gate:
+      name: "LD2412 Minimum Distance Gate"
+      entity_category: config
+    max_distance_gate:
+      name: "LD2412 Maximum Distance Gate"
+      entity_category: config
+    light_threshold:
+      name: "LD2412 Light Threshold"
+      entity_category: config
+
+switch:
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    engineering_mode:
+      name: "LD2412 Engineering Mode"
+      entity_category: config
+      disabled_by_default: true
+    bluetooth:
+      name: "LD2412 Bluetooth"
+      entity_category: config
+
+select:
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    out_pin_level:
+      name: "LD2412 Output Pin Level"
+      entity_category: config
+    distance_resolution:
+      name: "LD2412 Distance Resolution"
+      entity_category: config
+    light_function:
+      name: "LD2412 Light Function"
+      entity_category: config
+
+button:
+  - platform: restart
+    id: restart_button
+    name: "Restart"
+    entity_category: config
+
+  - platform: safe_mode
+    id: safe_mode_button
+    name: "Restart in Safe Mode"
+    entity_category: diagnostic
+
+  - platform: factory_reset
+    id: factory_reset_button
+    name: "Factory Reset"
+    entity_category: config
+    disabled_by_default: true
+
+  - platform: template
+    id: co2_calibration_button
+    name: "CO2 Manual Calibration"
+    entity_category: config
+    disabled_by_default: true
+    on_press:
+      then:
+        - scd4x.perform_forced_calibration:
+            id: scd41
+            value: 420
+
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    restart:
+      name: "LD2412 Restart"
+      entity_category: diagnostic
+    factory_reset:
+      name: "LD2412 Factory Reset"
+      entity_category: diagnostic
+      disabled_by_default: true
+    query_params:
+      name: "LD2412 Query Parameters"
+      entity_category: diagnostic
+      disabled_by_default: true
+    start_dynamic_background_correction:
+      name: "LD2412 Dynamic Background Correction"
+      entity_category: config
+      disabled_by_default: true
+
+text_sensor:
+  - platform: version
+    id: esphome_version
+    name: "ESPHome Version"
+    hide_timestamp: true
+    entity_category: diagnostic
+
+  - platform: template
+    id: software_version
+    name: "Software Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${ultimatesensor_software_version}"};
+    entity_category: diagnostic
+
+  - platform: template
+    id: hardware_version
+    name: "Hardware Version"
+    update_interval: 5h
+    lambda: |-
+      return {"${ultimatesensor_hardware_version}"};
+    entity_category: diagnostic
+
+  - platform: template
+    id: connection_type
+    name: "Connection type"
+    update_interval: 5h
+    lambda: |-
+      return {"${ultimatesensor_connection_type}"};
+    entity_category: diagnostic
+
+  - platform: ld2412
+    ld2412_id: ld2412_radar
+    version:
+      name: "LD2412 Firmware"
+      entity_category: diagnostic
+    mac_address:
+      name: "LD2412 Bluetooth MAC"
+      entity_category: diagnostic

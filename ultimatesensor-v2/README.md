@@ -1,0 +1,77 @@
+# UltimateSensor V2 ESPHome Firmware
+
+UltimateSensor V2 is sold as standard hardware with LD2412 + LD2450, plus PIR, microphone, speaker, environmental sensors, and WiFi/Ethernet firmware variants. The optional LD2460 is an upgrade module: customers remove/replace the LD2450 module, install the LD2460 module, and flash one of the `*-ld2460.yaml` firmware variants.
+
+Leave the LD2412 installed. LD2412 and PIR remain reliable presence fallbacks and make occupancy more robust together with either LD2450 or LD2460.
+
+## Package Layout
+
+| Package | Purpose |
+| --- | --- |
+| `base.yaml` | Shared ESP32-S3 hardware, sensors, PIR, LD2412, microphone, speaker, media player, API, OTA, and combined occupancy logic |
+| `tracking-ld2450.yaml` | Standard factory tracking package for LD2450 on GPIO11/GPIO12 |
+| `tracking-ld2460.yaml` | Optional upgrade tracking package for LD2460 on GPIO6/GPIO5 via `smarthomeshop/ld2460` |
+| `wifi.yaml` | WiFi firmware network stack, captive portal, Improv, WiFi diagnostics, Ethernet power off |
+| `ethernet.yaml` | W5500 Ethernet firmware network stack and Ethernet diagnostics |
+| `voice-assistant.yaml` | Local wake word and Home Assistant voice assistant package |
+| `complete.yaml` | SPS30 particulate matter sensor and PM idle controls |
+
+## Firmware Variants
+
+Standard variants are for the product as shipped with LD2412 + LD2450.
+
+| File | Network | SPS30 | Tracking radar | Voice |
+| --- | --- | --- | --- | --- |
+| `ultimatesensor-v2-wifi-basic.yaml` | WiFi | No | LD2450 | Yes |
+| `ultimatesensor-v2-wifi-complete.yaml` | WiFi | Yes | LD2450 | Yes |
+| `ultimatesensor-v2-ethernet-basic.yaml` | Ethernet W5500 | No | LD2450 | Yes |
+| `ultimatesensor-v2-ethernet-complete.yaml` | Ethernet W5500 | Yes | LD2450 | Yes |
+
+LD2460 upgrade variants are only for devices where the LD2450 module has been removed/replaced by the optional LD2460 module.
+
+| File | Network | SPS30 | Tracking radar | Voice |
+| --- | --- | --- | --- | --- |
+| `ultimatesensor-v2-wifi-basic-ld2460.yaml` | WiFi | No | LD2460 | Yes |
+| `ultimatesensor-v2-wifi-complete-ld2460.yaml` | WiFi | Yes | LD2460 | Yes |
+| `ultimatesensor-v2-ethernet-basic-ld2460.yaml` | Ethernet W5500 | No | LD2460 | Yes |
+| `ultimatesensor-v2-ethernet-complete-ld2460.yaml` | Ethernet W5500 | Yes | LD2460 | Yes |
+
+ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi variants keep the W5500 powered off. The Ethernet variants power the W5500 and expose Ethernet network info sensors.
+
+## Radar Policy
+
+- Factory default: keep LD2412 installed and use LD2450 firmware.
+- LD2460 upgrade: remove/replace the LD2450 module, install LD2460, and flash a `*-ld2460.yaml` firmware file.
+- Do not remove LD2412 for normal installs. It is the reliable close-range/still-presence fallback.
+- `Occupancy` is always `PIR motion OR LD2412 presence OR tracking radar presence`.
+- The standard LD2450 firmware exposes Bluetooth/configuration controls for the LD2450.
+- The LD2460 firmware uses the external component package from `github://smarthomeshop/ld2460/tracking-ld2460.yaml@v0.1.1`.
+
+## Pin Map
+
+| Function | GPIO |
+| --- | --- |
+| I2C SDA | GPIO10 |
+| I2C SCL | GPIO9 |
+| PIR motion | GPIO1 |
+| LD2412 TX/RX | GPIO14 / GPIO13 |
+| LD2450 TX/RX, standard hardware | GPIO11 / GPIO12 |
+| LD2460 TX/RX, optional upgrade | GPIO6 / GPIO5 |
+| Microphone WS/SD/BCLK | GPIO7 / GPIO15 / GPIO16 |
+| Speaker LRCLK/DOUT/BCLK | GPIO8 / GPIO17 / GPIO18 |
+| Front RGB LEDs | GPIO20, 3x WS2812/GRB |
+| ESP status LED | GPIO19 |
+| W5500 power enable | GPIO47, inverted |
+| W5500 CLK | GPIO21 |
+| W5500 MOSI | GPIO45 |
+| W5500 MISO | GPIO38 |
+| W5500 CS | GPIO41 |
+| W5500 interrupt | GPIO39 |
+| W5500 reset | GPIO40 |
+
+## Notes
+
+- Basic variants omit `complete.yaml`.
+- Complete variants include `complete.yaml`, which adds the SPS30 at I2C address `0x69`.
+- Voice assistant support is part of every UltimateSensor V2 variant.
+- Local wake word defaults to `okay_nabu` and can be toggled with `Enable Voice Assistant`.

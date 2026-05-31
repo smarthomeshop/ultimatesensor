@@ -1,0 +1,58 @@
+# UltimateSensor V2 WiFi network package.
+# Ethernet power is kept off in WiFi firmware because ESPHome should not run WiFi and Ethernet together.
+
+esphome:
+  on_boot:
+    - priority: 800
+      then:
+        - switch.turn_off: eth_power
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: ${wifi_fast_connect}
+  enable_rrm: true
+  ap:
+    ssid: ${device_name}
+    password: ${device_name}
+
+captive_portal:
+
+esp32_improv:
+  authorizer: none
+
+switch:
+  - platform: gpio
+    id: eth_power
+    internal: true
+    restore_mode: ALWAYS_OFF
+    pin:
+      number: GPIO47
+      inverted: true
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: wifi_ip
+      icon: "mdi:network-outline"
+      entity_category: diagnostic
+      disabled_by_default: true
+    mac_address:
+      name: "ESP MAC"
+      id: wifi_mac
+      entity_category: diagnostic
+      disabled_by_default: true
+    ssid:
+      name: "Connected SSID"
+      entity_category: diagnostic
+    bssid:
+      name: "Connected BSSID"
+      entity_category: diagnostic
+      disabled_by_default: true
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic

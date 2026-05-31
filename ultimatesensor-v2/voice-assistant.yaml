@@ -1,0 +1,241 @@
+# UltimateSensor V2 local wake-word and voice assistant package.
+# Uses the microphone, speaker media player, and RGB LED from base.yaml.
+
+substitutions:
+  wake_word: okay_nabu
+  micro_wake_word_gain_factor: "12"
+  wake_word_probability_cutoff: "0.80"
+  wake_word_sliding_window_size: "3"
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+
+esphome:
+  on_boot:
+    - priority: 300
+      then:
+        - if:
+            condition:
+              switch.is_on: use_wake_word
+            then:
+              - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+              - light.turn_on:
+                  id: rgb_front_led
+                  red: 100%
+                  green: 100%
+                  blue: 0%
+                  brightness: 35%
+                  effect: "Connecting"
+
+micro_wake_word:
+  id: micro_wake_word_01
+  microphone:
+    microphone: microphone_01
+    channels: 0
+    gain_factor: ${micro_wake_word_gain_factor}
+  models:
+    - model: ${wake_word}
+      probability_cutoff: ${wake_word_probability_cutoff}
+      sliding_window_size: ${wake_word_sliding_window_size}
+  on_wake_word_detected:
+    - logger.log: "Wake word detected"
+    - micro_wake_word.stop:
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 70%
+        blue: 100%
+        brightness: 80%
+        effect: "Wake Sweep"
+    - delay: 250ms
+    - voice_assistant.start:
+        wake_word: !lambda return wake_word;
+
+voice_assistant:
+  id: voice_assistant_01
+  microphone: microphone_01
+  media_player: media_player_01
+  micro_wake_word: micro_wake_word_01
+  use_wake_word: false
+  auto_gain: 31dBFS
+  noise_suppression_level: 2
+  on_client_connected:
+    - lambda: id(init_in_progress) = false;
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          - script.execute: start_wake_word
+        else:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: reset_voice_led
+  on_client_disconnected:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - voice_assistant.stop:
+    - micro_wake_word.stop:
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - light.turn_on:
+              id: rgb_front_led
+              red: 100%
+              green: 100%
+              blue: 0%
+              brightness: 35%
+              effect: "Connecting"
+  on_listening:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 30%
+        blue: 100%
+        brightness: 65%
+        effect: "Slow Pulse"
+  on_stt_vad_end:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 50%
+        green: 0%
+        blue: 100%
+        brightness: 70%
+        effect: "Fast Pulse"
+  on_tts_start:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 90%
+        blue: 0%
+        brightness: 75%
+        effect: none
+  on_end:
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          - delay: 300ms
+          - script.execute: start_wake_word
+        else:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: reset_voice_led
+  on_error:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 100%
+        green: 0%
+        blue: 0%
+        brightness: 100%
+        effect: none
+    - delay: 1s
+    - lambda: |-
+        if (code == "wake-provider-missing" || code == "wake-engine-missing") {
+          id(use_wake_word).turn_off();
+        }
+    - if:
+        condition:
+          switch.is_on: use_wake_word
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          - script.execute: start_wake_word
+        else:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          - script.execute: reset_voice_led
+
+script:
+  - id: start_wake_word
+    mode: restart
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: use_wake_word
+              - not:
+                  voice_assistant.is_running:
+          then:
+            - micro_wake_word.start:
+      - script.execute: reset_voice_led
+
+  - id: stop_wake_word
+    mode: restart
+    then:
+      - micro_wake_word.stop:
+      - script.execute: reset_voice_led
+
+  - id: reset_voice_led
+    mode: restart
+    then:
+      - light.turn_off:
+          id: rgb_front_led
+
+switch:
+  - platform: template
+    id: use_wake_word
+    name: "Use Wake Word"
+    icon: mdi:assistant
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+    turn_on_action:
+      - lambda: |-
+          if (!id(init_in_progress)) {
+            id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+          }
+      - voice_assistant.stop:
+      - delay: 1s
+      - script.execute: start_wake_word
+    turn_off_action:
+      - lambda: |-
+          if (!id(init_in_progress)) {
+            id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+          }
+      - voice_assistant.stop:
+      - script.execute: stop_wake_word
+
+button:
+  - platform: template
+    id: voice_assistant_start_button
+    name: "Voice Assistant Start"
+    icon: mdi:microphone
+    entity_category: config
+    on_press:
+      - micro_wake_word.stop:
+      - voice_assistant.start:
+
+globals:
+  - id: init_in_progress
+    type: bool
+    restore_value: no
+    initial_value: "true"
+  - id: voice_assistant_phase
+    type: int
+    restore_value: no
+    initial_value: ${voice_assist_not_ready_phase_id}
+
+text_sensor:
+  - platform: template
+    id: voice_assistant_phase_text
+    name: "Voice Assistant Phase"
+    icon: mdi:assistant
+    entity_category: diagnostic
+    update_interval: 1s
+    lambda: |-
+      switch (id(voice_assistant_phase)) {
+        case ${voice_assist_idle_phase_id}: return {"idle"};
+        case ${voice_assist_listening_phase_id}: return {"listening"};
+        case ${voice_assist_thinking_phase_id}: return {"thinking"};
+        case ${voice_assist_replying_phase_id}: return {"replying"};
+        case ${voice_assist_not_ready_phase_id}: return {"not_ready"};
+        case ${voice_assist_error_phase_id}: return {"error"};
+        case ${voice_assist_muted_phase_id}: return {"muted"};
+        default: return {"unknown"};
+      }

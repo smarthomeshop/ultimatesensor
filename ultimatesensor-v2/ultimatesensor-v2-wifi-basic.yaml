@@ -1,0 +1,18 @@
+# UltimateSensor V2 WiFi Basic Configuration
+# ESP32-S3 firmware without the SPS30 particulate matter sensor.
+
+substitutions:
+  device_name: ultimatesensor-v2
+  friendly_name: "UltimateSensor V2"
+  ultimatesensor_hardware_version: "V2-Basic"
+  ultimatesensor_connection_type: "WiFi"
+  wifi_fast_connect: "true"
+
+packages:
+  base: !include base.yaml
+  tracking: !include tracking-ld2450.yaml
+  net: !include wifi.yaml
+  voice: !include voice-assistant.yaml
+
+dashboard_import:
+  package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-wifi-basic.yaml@main

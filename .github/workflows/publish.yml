@@ -21,6 +21,7 @@ on:
       - "CHANGELOG.md"
       - ".github/workflows/**"
       - "ultimatesensor-v1/**"
+      - "ultimatesensor-v2/**"
 
 permissions:
   contents: write
@@ -66,7 +67,7 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if ! echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$'; then
+          if ! echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v[12]/.*\.ya?ml$'; then
             echo "No firmware YAML changes detected; changelog update not required"
             exit 0
           fi
@@ -102,7 +103,10 @@ jobs:
     outputs:
       v1_changed: ${{ steps.changes.outputs.v1 }}
       v1_build: ${{ steps.changes.outputs.v1_build }}
+      v2_changed: ${{ steps.changes.outputs.v2 }}
+      v2_build: ${{ steps.changes.outputs.v2_build }}
       v1_version: ${{ steps.versions.outputs.v1_version }}
+      v2_version: ${{ steps.versions.outputs.v2_version }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -119,6 +123,8 @@ jobs:
             echo "Force building all variants"
             echo "v1=true" >> "$GITHUB_OUTPUT"
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -126,6 +132,8 @@ jobs:
             echo "Scheduled build - rebuilding all variants with latest ESPHome"
             echo "v1=true" >> "$GITHUB_OUTPUT"
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -133,6 +141,8 @@ jobs:
             echo "Tag detected, building all variants"
             echo "v1=true" >> "$GITHUB_OUTPUT"
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -148,6 +158,8 @@ jobs:
             echo "First push detected, building all variants"
             echo "v1=true" >> "$GITHUB_OUTPUT"
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -156,6 +168,7 @@ jobs:
           echo "$CHANGED_FILES"
 
           V1_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$' && echo "true" || echo "false")
+          V2_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v2/.*\.ya?ml$' && echo "true" || echo "false")
           WORKFLOW_CHANGED=$(echo "$CHANGED_FILES" | grep -q '^.github/workflows/' && echo "true" || echo "false")
 
           if [[ "$WORKFLOW_CHANGED" == "true" ]]; then
@@ -163,12 +176,18 @@ jobs:
           fi
 
           echo "v1=$V1_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "v2=$V2_CHANGED" >> "$GITHUB_OUTPUT"
+
           if [[ "$WORKFLOW_CHANGED" == "true" ]]; then
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
           else
             echo "v1_build=$V1_CHANGED" >> "$GITHUB_OUTPUT"
+            echo "v2_build=$V2_CHANGED" >> "$GITHUB_OUTPUT"
           fi
+
           echo "V1 changed: $V1_CHANGED"
+          echo "V2 changed: $V2_CHANGED"
 
       - name: Update version numbers for changed versions
         id: versions
@@ -177,53 +196,90 @@ jobs:
           set -euo pipefail
 
           IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
-          VERSION_FILE="ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
+          V1_VERSION_FILE="ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
+          V2_VERSION_FILE="ultimatesensor-v2/base.yaml"
 
-          update_version() {
-            local version_file=$1
-            local output_name=$2
+          git fetch --tags --force >/dev/null 2>&1 || true
 
-            if [[ ! -f "$version_file" ]]; then
-              echo "${output_name}=1.0" >> "$GITHUB_OUTPUT"
-              return
-            fi
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            BASE_SHA=${{ github.event.before }}
+          else
+            BASE_SHA=""
+          fi
 
-            current_version=$(grep "ultimatesensor_software_version:" "$version_file" | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
-            echo "Current version for $version_file: $current_version"
+          read_version() {
+            local file=$1
+            local key=$2
+            local fallback=$3
+
+            awk -F'"' -v key="$key" '$0 ~ "^[[:space:]]*" key ":[[:space:]]*\\\"" { print $2; exit }' "$file" 2>/dev/null || true
+          }
+
+          increment_version() {
+            local current_version=$1
 
             if [[ "$IS_SCHEDULED" == "true" ]]; then
-              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
-              echo "Scheduled build - keeping version: $current_version"
+              echo "$current_version"
               return
             fi
 
             if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
-              echo "Tag build - keeping version: $current_version"
+              echo "$current_version"
               return
             fi
 
             if [[ "$current_version" =~ ^([0-9]+)\.([0-9]+)(.*)$ ]]; then
-              major="${BASH_REMATCH[1]}"
-              minor="${BASH_REMATCH[2]}"
-              suffix="${BASH_REMATCH[3]}"
-              new_minor=$((minor + 1))
-              new_version="${major}.${new_minor}${suffix}"
+              local major="${BASH_REMATCH[1]}"
+              local minor="${BASH_REMATCH[2]}"
+              local suffix="${BASH_REMATCH[3]}"
+              echo "${major}.$((minor + 1))${suffix}"
             else
+              local shortsha
               shortsha=$(echo "${GITHUB_SHA}" | cut -c1-7)
-              new_version="dev-${shortsha}"
+              echo "dev-${shortsha}"
             fi
-
-            echo "${output_name}=${new_version}" >> "$GITHUB_OUTPUT"
-            echo "New version for $version_file: $new_version"
           }
 
-          if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
-            update_version "$VERSION_FILE" "v1_version"
-          else
-            v1_current=$(grep "ultimatesensor_software_version:" "$VERSION_FILE" 2>/dev/null | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/' || echo "1.0")
-            echo "v1_version=$v1_current" >> "$GITHUB_OUTPUT"
-          fi
+          version_for_change() {
+            local output_name=$1
+            local file=$2
+            local key=$3
+            local fallback=$4
+            local changed=$5
+            local release_tag_prefix=$6
+            local current_version
+            local new_version
+
+            current_version=$(read_version "$file" "$key" "$fallback")
+            current_version=${current_version:-$fallback}
+            echo "Current version for $file: $current_version"
+
+            if [[ "$changed" != "true" ]]; then
+              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
+              return
+            fi
+
+            if [[ -n "$BASE_SHA" ]] && ! git cat-file -e "${BASE_SHA}:${file}" 2>/dev/null; then
+              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
+              echo "Initial release for $file - keeping version: $current_version"
+              return
+            fi
+
+            if [[ -n "$release_tag_prefix" ]] && ! git rev-parse -q --verify "refs/tags/${release_tag_prefix}-${current_version}" >/dev/null; then
+              echo "${output_name}=${current_version}" >> "$GITHUB_OUTPUT"
+              echo "No release tag found for ${release_tag_prefix}-${current_version} - keeping version: $current_version"
+              return
+            fi
+
+            new_version=$(increment_version "$current_version")
+            echo "${output_name}=${new_version}" >> "$GITHUB_OUTPUT"
+            echo "New version for $file: $new_version"
+          }
+
+          version_for_change "v1_version" "$V1_VERSION_FILE" "ultimatesensor_software_version" "1.0" "${{ steps.changes.outputs.v1 }}" "ultimatesensor-v1"
+          version_for_change "v2_version" "$V2_VERSION_FILE" "ultimatesensor_software_version" "1.0" "${{ steps.changes.outputs.v2 }}" "ultimatesensor-v2"
 
       - name: Commit version updates and create tags
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -231,11 +287,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          version_files=(
+          version_files_v1=(
             "ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
             "ultimatesensor-v1/ultimatesensor-wifi-complete.yaml"
             "ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml"
             "ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml"
+          )
+          version_files_v2=(
+            "ultimatesensor-v2/base.yaml"
           )
 
           finalize_changelog() {
@@ -264,6 +323,14 @@ jobs:
             if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
               {
                 printf '## [UltimateSensor V1 %s] - %s\n\n' "${{ steps.versions.outputs.v1_version }}" "$release_date"
+                cat "$unreleased_notes"
+                printf '\n'
+              } >> "$release_blocks"
+            fi
+
+            if [[ "${{ steps.changes.outputs.v2 }}" == "true" ]]; then
+              {
+                printf '## [UltimateSensor V2 %s] - %s\n\n' "${{ steps.versions.outputs.v2_version }}" "$release_date"
                 cat "$unreleased_notes"
                 printf '\n'
               } >> "$release_blocks"
@@ -311,8 +378,15 @@ jobs:
           changes_made=false
 
           if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
-            for version_file in "${version_files[@]}"; do
+            for version_file in "${version_files_v1[@]}"; do
               sed -i "s/^\s*ultimatesensor_software_version: \".*\"/  ultimatesensor_software_version: \"${{ steps.versions.outputs.v1_version }}\"/" "$version_file"
+            done
+            changes_made=true
+          fi
+
+          if [[ "${{ steps.changes.outputs.v2 }}" == "true" ]]; then
+            for version_file in "${version_files_v2[@]}"; do
+              sed -i "s/^\s*ultimatesensor_software_version: \".*\"/  ultimatesensor_software_version: \"${{ steps.versions.outputs.v2_version }}\"/" "$version_file"
             done
             changes_made=true
           fi
@@ -324,15 +398,22 @@ jobs:
           if [[ "$changes_made" == "true" ]] && ! git diff --quiet; then
             git config --local user.email "action@github.com"
             git config --local user.name "GitHub Action"
-            git add CHANGELOG.md "${version_files[@]}"
+            git add CHANGELOG.md "${version_files_v1[@]}" "${version_files_v2[@]}"
 
-            msg="chore: update versions V1=${{ steps.versions.outputs.v1_version }} [skip ci]"
+            msg="chore: update versions"
+            [[ "${{ steps.changes.outputs.v1 }}" == "true" ]] && msg="$msg V1=${{ steps.versions.outputs.v1_version }}"
+            [[ "${{ steps.changes.outputs.v2 }}" == "true" ]] && msg="$msg V2=${{ steps.versions.outputs.v2_version }}"
+            msg="$msg [skip ci]"
 
             git commit -m "$msg" || exit 0
             git push || echo "Nothing to push"
 
-            if [[ ! "${{ steps.versions.outputs.v1_version }}" =~ ^dev- ]]; then
+            if [[ "${{ steps.changes.outputs.v1 }}" == "true" && ! "${{ steps.versions.outputs.v1_version }}" =~ ^dev- ]]; then
               create_tag "ultimatesensor-v1-${{ steps.versions.outputs.v1_version }}"
+            fi
+
+            if [[ "${{ steps.changes.outputs.v2 }}" == "true" && ! "${{ steps.versions.outputs.v2_version }}" =~ ^dev- ]]; then
+              create_tag "ultimatesensor-v2-${{ steps.versions.outputs.v2_version }}"
             fi
           fi
 
@@ -388,6 +469,118 @@ jobs:
       directory_name: ultimatesensor-ethernet-complete
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
 
+  build-ultimatesensor-v2-wifi-basic:
+    name: Build UltimateSensor V2 WiFi Basic
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic.yaml
+      name: UltimateSensor V2 WiFi Basic
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-basic
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-complete:
+    name: Build UltimateSensor V2 WiFi Complete
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete.yaml
+      name: UltimateSensor V2 WiFi Complete
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-complete
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-basic:
+    name: Build UltimateSensor V2 Ethernet Basic
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic.yaml
+      name: UltimateSensor V2 Ethernet Basic
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-basic
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-complete:
+    name: Build UltimateSensor V2 Ethernet Complete
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete.yaml
+      name: UltimateSensor V2 Ethernet Complete
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-complete
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-basic-ld2460:
+    name: Build UltimateSensor V2 WiFi Basic LD2460
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460.yaml
+      name: UltimateSensor V2 WiFi Basic LD2460
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-basic-ld2460
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-complete-ld2460:
+    name: Build UltimateSensor V2 WiFi Complete LD2460
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460.yaml
+      name: UltimateSensor V2 WiFi Complete LD2460
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-complete-ld2460
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-basic-ld2460:
+    name: Build UltimateSensor V2 Ethernet Basic LD2460
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460.yaml
+      name: UltimateSensor V2 Ethernet Basic LD2460
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-basic-ld2460
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-complete-ld2460:
+    name: Build UltimateSensor V2 Ethernet Complete LD2460
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460.yaml
+      name: UltimateSensor V2 Ethernet Complete LD2460
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-complete-ld2460
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
   publish-gh-pages:
     name: Publish firmware to GitHub Pages
     needs:
@@ -396,6 +589,14 @@ jobs:
       - build-ultimatesensor-wifi-complete
       - build-ultimatesensor-ethernet-basic
       - build-ultimatesensor-ethernet-complete
+      - build-ultimatesensor-v2-wifi-basic
+      - build-ultimatesensor-v2-wifi-complete
+      - build-ultimatesensor-v2-ethernet-basic
+      - build-ultimatesensor-v2-ethernet-complete
+      - build-ultimatesensor-v2-wifi-basic-ld2460
+      - build-ultimatesensor-v2-wifi-complete-ld2460
+      - build-ultimatesensor-v2-ethernet-basic-ld2460
+      - build-ultimatesensor-v2-ethernet-complete-ld2460
     if: |
       always() &&
       github.event_name != 'pull_request' &&
@@ -404,7 +605,15 @@ jobs:
         needs.build-ultimatesensor-wifi-basic.result == 'success' ||
         needs.build-ultimatesensor-wifi-complete.result == 'success' ||
         needs.build-ultimatesensor-ethernet-basic.result == 'success' ||
-        needs.build-ultimatesensor-ethernet-complete.result == 'success'
+        needs.build-ultimatesensor-ethernet-complete.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-basic.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-complete.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-basic.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-complete.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-basic-ld2460.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-complete-ld2460.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-basic-ld2460.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-complete-ld2460.result == 'success'
       )
     runs-on: ubuntu-latest
     steps:
@@ -441,6 +650,62 @@ jobs:
           name: UltimateSensor Ethernet Complete
           path: output
 
+      - name: Download V2 WiFi Basic artifact
+        if: needs.build-ultimatesensor-v2-wifi-basic.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Basic
+          path: output
+
+      - name: Download V2 WiFi Complete artifact
+        if: needs.build-ultimatesensor-v2-wifi-complete.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Complete
+          path: output
+
+      - name: Download V2 Ethernet Basic artifact
+        if: needs.build-ultimatesensor-v2-ethernet-basic.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Basic
+          path: output
+
+      - name: Download V2 Ethernet Complete artifact
+        if: needs.build-ultimatesensor-v2-ethernet-complete.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Complete
+          path: output
+
+      - name: Download V2 WiFi Basic LD2460 artifact
+        if: needs.build-ultimatesensor-v2-wifi-basic-ld2460.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Basic LD2460
+          path: output
+
+      - name: Download V2 WiFi Complete LD2460 artifact
+        if: needs.build-ultimatesensor-v2-wifi-complete-ld2460.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Complete LD2460
+          path: output
+
+      - name: Download V2 Ethernet Basic LD2460 artifact
+        if: needs.build-ultimatesensor-v2-ethernet-basic-ld2460.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Basic LD2460
+          path: output
+
+      - name: Download V2 Ethernet Complete LD2460 artifact
+        if: needs.build-ultimatesensor-v2-ethernet-complete-ld2460.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Complete LD2460
+          path: output
+
       - name: Create manifests
         shell: bash
         run: |
@@ -474,6 +739,14 @@ jobs:
           create_manifest "ultimatesensor-wifi-complete" "ultimatesensor-wifi-complete-manifest.json" "UltimateSensor WiFi Complete" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-basic" "ultimatesensor-ethernet-basic-manifest.json" "UltimateSensor Ethernet Basic" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-complete" "ultimatesensor-ethernet-complete-manifest.json" "UltimateSensor Ethernet Complete" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-v2-wifi-basic" "ultimatesensor-v2-wifi-basic-manifest.json" "UltimateSensor V2 WiFi Basic" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-complete" "ultimatesensor-v2-wifi-complete-manifest.json" "UltimateSensor V2 WiFi Complete" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-basic" "ultimatesensor-v2-ethernet-basic-manifest.json" "UltimateSensor V2 Ethernet Basic" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-complete" "ultimatesensor-v2-ethernet-complete-manifest.json" "UltimateSensor V2 Ethernet Complete" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-basic-ld2460" "ultimatesensor-v2-wifi-basic-ld2460-manifest.json" "UltimateSensor V2 WiFi Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-complete-ld2460" "ultimatesensor-v2-wifi-complete-ld2460-manifest.json" "UltimateSensor V2 WiFi Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460" "ultimatesensor-v2-ethernet-basic-ld2460-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460" "ultimatesensor-v2-ethernet-complete-ld2460-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
 
       - name: Create README for gh-pages
         shell: bash
@@ -495,20 +768,29 @@ jobs:
           - `ultimatesensor-wifi-complete/`
           - `ultimatesensor-ethernet-basic/`
           - `ultimatesensor-ethernet-complete/`
+          - `ultimatesensor-v2-wifi-basic/`
+          - `ultimatesensor-v2-wifi-complete/`
+          - `ultimatesensor-v2-ethernet-basic/`
+          - `ultimatesensor-v2-ethernet-complete/`
+          - `ultimatesensor-v2-wifi-basic-ld2460/`
+          - `ultimatesensor-v2-wifi-complete-ld2460/`
+          - `ultimatesensor-v2-ethernet-basic-ld2460/`
+          - `ultimatesensor-v2-ethernet-complete-ld2460/`
           - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
 
-          ## OTA update manifests
-          Example URLs:
-          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic/manifest.json`
-          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete/manifest.json`
-          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic/manifest.json`
-          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete/manifest.json`
-
-          Aggregate URLs:
+          ## Aggregate manifest URLs
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-basic-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-wifi-complete-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-complete-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
 
           ## How this branch is updated
           On pushes to the default branch, or when manually dispatched, the CI pipeline:
@@ -588,4 +870,8 @@ jobs:
 
           if [[ "${{ needs.detect-changes.outputs.v1_changed }}" == "true" && ! "${{ needs.detect-changes.outputs.v1_version }}" =~ ^dev- ]]; then
             create_release "ultimatesensor-v1-${{ needs.detect-changes.outputs.v1_version }}" "UltimateSensor V1 ${{ needs.detect-changes.outputs.v1_version }}"
+          fi
+
+          if [[ "${{ needs.detect-changes.outputs.v2_changed }}" == "true" && ! "${{ needs.detect-changes.outputs.v2_version }}" =~ ^dev- ]]; then
+            create_release "ultimatesensor-v2-${{ needs.detect-changes.outputs.v2_version }}" "UltimateSensor V2 ${{ needs.detect-changes.outputs.v2_version }}"
           fi

@@ -154,13 +154,22 @@ jobs:
         run: |
           set -euo pipefail
 
+          MANIFEST_VERSION="${{ inputs.software_version }}"
+          if [[ -z "$MANIFEST_VERSION" ]]; then
+            MANIFEST_VERSION="${{ needs.build.outputs.project-version }}"
+          fi
+
           MANIFEST_FILE=$(find output -name "manifest.json" -type f | head -1)
           if [[ -z "$MANIFEST_FILE" ]]; then
             echo "ERROR: No manifest.json found in output directory"
             exit 1
           fi
 
-          jq -s '{"name": "${{ inputs.name }}", "version": "${{ needs.build.outputs.project-version }}", "home_assistant_domain": "esphome", "new_install_skip_erase": false, "builds":.}' "$MANIFEST_FILE" \
+          jq -s \
+            --arg name "${{ inputs.name }}" \
+            --arg version "$MANIFEST_VERSION" \
+            '{"name": $name, "version": $version, "home_assistant_domain": "esphome", "new_install_skip_erase": false, "builds":.}' \
+            "$MANIFEST_FILE" \
             > output/${{ inputs.manifest_filename }}
           jq --arg dir "${{ inputs.directory_name }}" '
             .builds[].ota.path |= "\($dir)/\(.)" |

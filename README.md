@@ -10,7 +10,7 @@ Product page: https://ultimatesensor.nl/en
 
 UltimateSensor combines multiple room sensors on one ESP32 device. The ESPHome firmware exposes all measurements directly to Home Assistant and supports WiFi or wired Ethernet depending on the firmware variant.
 
-The Basic firmware uses the shared configuration without the SPS30 particulate matter sensor. The Complete firmware adds SPS30 particulate matter measurements and Home Assistant controls for the PM sensor and night mode.
+The Basic firmware uses the shared configuration without the SPS30 particulate matter sensor. The Complete firmware adds SPS30 particulate matter measurements and Home Assistant controls for the PM sensor and night mode. UltimateSensor V2 is sold standard with LD2412 + LD2450. Customers who buy the optional LD2460 upgrade remove/replace the LD2450 module and flash a dedicated `LD2460` firmware variant while leaving LD2412 installed.
 
 ## Key Features
 
@@ -18,7 +18,11 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 - Temperature and humidity sensing
 - Light sensing with BH1750
 - VOC and NOx index sensing with SGP4x
-- LD2450 mmWave occupancy and target tracking
+- LD2412 close-range mmWave presence sensing on V2
+- LD2450 mmWave occupancy and target tracking as the standard V2 tracking radar
+- Optional LD2460 target tracking upgrade firmware for V2
+- PIR motion sensing on V2
+- I2S microphone, speaker media player, local wake word, and Home Assistant voice assistant on V2
 - OLED display with Home Assistant LCD display control
 - RGB back light and ESP status LED
 - WiFi firmware with captive portal fallback
@@ -33,10 +37,11 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 | Version | Chip | Connectivity | Description |
 |---------|------|--------------|-------------|
 | V1 | ESP32 | WiFi, Ethernet, and PoE | UltimateSensor hardware with Basic and Complete firmware variants |
+| V2 | ESP32-S3 | WiFi, W5500 Ethernet, and PoE | UltimateSensor V2 hardware with LD2412 + LD2450 standard, optional LD2460 upgrade firmware, PIR, microphone, speaker, and Basic/Complete variants |
 
 ## Variants
 
-We publish customer-facing WiFi and Ethernet firmware variants for the V1 hardware.
+We publish customer-facing WiFi and Ethernet firmware variants for V1 and V2 hardware.
 
 | Hardware | Variant | Description |
 |----------|---------|-------------|
@@ -44,6 +49,12 @@ We publish customer-facing WiFi and Ethernet firmware variants for the V1 hardwa
 | V1 (ESP32) | WiFi Complete | WiFi firmware with SPS30 particulate matter sensing |
 | V1 (ESP32) | Ethernet Basic | Ethernet firmware without the SPS30 particulate matter sensor |
 | V1 (ESP32) | Ethernet Complete | Ethernet firmware with SPS30 particulate matter sensing |
+| V2 (ESP32-S3) | WiFi Basic | WiFi firmware without the SPS30 particulate matter sensor |
+| V2 (ESP32-S3) | WiFi Complete | WiFi firmware with SPS30 particulate matter sensing |
+| V2 (ESP32-S3) | Ethernet Basic | W5500 Ethernet firmware without the SPS30 particulate matter sensor |
+| V2 (ESP32-S3) | Ethernet Complete | W5500 Ethernet firmware with SPS30 particulate matter sensing |
+| V2 (ESP32-S3) | WiFi/Ethernet Basic LD2460 | Optional LD2460 upgrade firmware without SPS30 |
+| V2 (ESP32-S3) | WiFi/Ethernet Complete LD2460 | Optional LD2460 upgrade firmware with SPS30 |
 
 ## Sensors
 
@@ -55,8 +66,12 @@ We publish customer-facing WiFi and Ethernet firmware variants for the V1 hardwa
 | Light | Ambient light level |
 | VOC Index | Volatile organic compound index |
 | NOx Index | Nitrogen oxide index |
-| Occupancy | mmWave occupancy detection |
-| Target Position | LD2450 target X/Y position, speed, angle, distance, and resolution |
+| Occupancy | PIR and mmWave occupancy detection |
+| LD2412 | Close-range mmWave presence, moving/still target, and engineering controls on V2 |
+| Target Position | LD2450 target X/Y position, speed, angle, distance, and resolution by default; LD2460 target X/Y, distance, and angle in upgrade firmware |
+| Microphone | I2S microphone RMS/peak sound level diagnostics on V2 |
+| Voice Assistant | Local wake-word detection and Home Assistant voice assistant on V2 |
+| Speaker | I2S speaker media player on V2 |
 | PM1.0 / PM2.5 / PM4.0 / PM10 | Particulate matter measurements in the Complete variant |
 | WiFi Signal | WiFi signal strength in WiFi variants |
 | Uptime | Device uptime |
@@ -67,7 +82,8 @@ We publish customer-facing WiFi and Ethernet firmware variants for the V1 hardwa
 2. Flash the desired firmware with the web flasher or ESPHome CLI.
 3. If WiFi is not configured yet, connect to the fallback hotspot.
 4. Add the device to Home Assistant through the ESPHome integration.
-5. Use the LCD display, PM sensor, and Night Mode controls from Home Assistant where available.
+5. For V2 LD2460 upgrades, physically replace/remove the LD2450 module first, leave LD2412 installed, and flash one of the `*-ld2460` firmware files.
+6. Use the LCD display, PM sensor, and Night Mode controls from Home Assistant where available.
 
 Web flasher: https://smarthomeshop.io/en/firmware
 Product page: https://ultimatesensor.nl/en
@@ -90,6 +106,19 @@ ultimatesensor/
 │   ├── ultimatesensor-wifi-complete.yaml
 │   ├── ultimatesensor-ethernet-basic.yaml
 │   └── ultimatesensor-ethernet-complete.yaml
+├── ultimatesensor-v2/                  # V2 ESP32-S3 ESPHome configurations
+│   ├── base.yaml                       # Shared sensors, PIR, LD2412, microphone, speaker, and occupancy logic
+│   ├── tracking-ld2450.yaml            # Standard factory tracking package
+│   ├── tracking-ld2460.yaml            # Optional LD2460 upgrade package
+│   ├── wifi.yaml                       # Shared WiFi connectivity package
+│   ├── ethernet.yaml                   # Shared W5500 Ethernet connectivity package
+│   ├── voice-assistant.yaml            # Local wake word and Home Assistant voice assistant package
+│   ├── complete.yaml                   # SPS30 particulate matter package
+│   ├── ultimatesensor-v2-wifi-basic.yaml
+│   ├── ultimatesensor-v2-wifi-complete.yaml
+│   ├── ultimatesensor-v2-ethernet-basic.yaml
+│   ├── ultimatesensor-v2-ethernet-complete.yaml
+│   └── ultimatesensor-v2-*-*-ld2460.yaml
 ├── .github/workflows/                  # Build and release automation
 ├── CHANGELOG.md                        # Customer-facing firmware notes
 └── images/
@@ -103,6 +132,14 @@ Pre-built firmware manifests are published on the `gh-pages` branch.
 - WiFi Complete: `ultimatesensor-wifi-complete-manifest.json`
 - Ethernet Basic: `ultimatesensor-ethernet-basic-manifest.json`
 - Ethernet Complete: `ultimatesensor-ethernet-complete-manifest.json`
+- V2 WiFi Basic: `ultimatesensor-v2-wifi-basic-manifest.json`
+- V2 WiFi Complete: `ultimatesensor-v2-wifi-complete-manifest.json`
+- V2 Ethernet Basic: `ultimatesensor-v2-ethernet-basic-manifest.json`
+- V2 Ethernet Complete: `ultimatesensor-v2-ethernet-complete-manifest.json`
+- V2 WiFi Basic LD2460: `ultimatesensor-v2-wifi-basic-ld2460-manifest.json`
+- V2 WiFi Complete LD2460: `ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
+- V2 Ethernet Basic LD2460: `ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
+- V2 Ethernet Complete LD2460: `ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
 
 ## Contributing
 
