@@ -1,0 +1,13 @@
+{
+  "chipFamily": "ESP32",
+  "ota": {
+    "path": "ultimatesensor-esp32.ota.bin",
+    "md5": "9df810a30433562706e6b5a468f194c2"
+  },
+  "parts": [
+    {
+      "path": "ultimatesensor-esp32.factory.bin",
+      "offset": 0
+    }
+  ]
+}

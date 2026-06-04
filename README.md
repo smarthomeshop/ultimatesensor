@@ -14,14 +14,26 @@ Any manual changes will be overwritten on the next publish.
 - `ultimatesensor-wifi-complete/`
 - `ultimatesensor-ethernet-basic/`
 - `ultimatesensor-ethernet-complete/`
+- `ultimatesensor-wifi-basic-cloud/`
+- `ultimatesensor-wifi-complete-cloud/`
+- `ultimatesensor-ethernet-basic-cloud/`
+- `ultimatesensor-ethernet-complete-cloud/`
 - `ultimatesensor-v2-wifi-basic/`
 - `ultimatesensor-v2-wifi-complete/`
 - `ultimatesensor-v2-ethernet-basic/`
 - `ultimatesensor-v2-ethernet-complete/`
+- `ultimatesensor-v2-wifi-basic-cloud/`
+- `ultimatesensor-v2-wifi-complete-cloud/`
+- `ultimatesensor-v2-ethernet-basic-cloud/`
+- `ultimatesensor-v2-ethernet-complete-cloud/`
 - `ultimatesensor-v2-wifi-basic-ld2460/`
 - `ultimatesensor-v2-wifi-complete-ld2460/`
 - `ultimatesensor-v2-ethernet-basic-ld2460/`
 - `ultimatesensor-v2-ethernet-complete-ld2460/`
+- `ultimatesensor-v2-wifi-basic-ld2460-cloud/`
+- `ultimatesensor-v2-wifi-complete-ld2460-cloud/`
+- `ultimatesensor-v2-ethernet-basic-ld2460-cloud/`
+- `ultimatesensor-v2-ethernet-complete-ld2460-cloud/`
 - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
 
 ## Aggregate manifest URLs

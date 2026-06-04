@@ -1,0 +1,21 @@
+{
+  "name": "UltimateSensor V2 Ethernet Basic Cloud",
+  "version": "1.1",
+  "home_assistant_domain": "esphome",
+  "new_install_skip_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "ota": {
+        "path": "ultimatesensor-v2-ethernet-basic-cloud/ultimatesensor-v2-esp32s3.ota.bin",
+        "md5": "a36d30602a9fd7b53ac9bf20476a4913"
+      },
+      "parts": [
+        {
+          "path": "ultimatesensor-v2-ethernet-basic-cloud/ultimatesensor-v2-esp32s3.factory.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
