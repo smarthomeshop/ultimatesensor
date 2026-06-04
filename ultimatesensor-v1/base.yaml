@@ -126,8 +126,10 @@ sensor:
   # SGP40
   - platform: sgp4x
     voc:
+      id: voc_index
       name: "VOC Index"
     nox:
+      id: nox_index
       name: "NOx Index"
 
   # LD2450
@@ -560,6 +562,7 @@ binary_sensor:
   #MMWave
   - platform: template
     name: "Occupancy"
+    id: occupancy
     device_class: occupancy
     filters:
       - delayed_off: !lambda return (id(off_delay).state *1000);

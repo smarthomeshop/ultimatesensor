@@ -292,6 +292,10 @@ jobs:
             "ultimatesensor-v1/ultimatesensor-wifi-complete.yaml"
             "ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml"
             "ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml"
+            "ultimatesensor-v1/ultimatesensor-wifi-basic-cloud.yaml"
+            "ultimatesensor-v1/ultimatesensor-wifi-complete-cloud.yaml"
+            "ultimatesensor-v1/ultimatesensor-ethernet-basic-cloud.yaml"
+            "ultimatesensor-v1/ultimatesensor-ethernet-complete-cloud.yaml"
           )
           version_files_v2=(
             "ultimatesensor-v2/base.yaml"
@@ -581,6 +585,170 @@ jobs:
       software_version: ${{ needs.detect-changes.outputs.v2_version }}
       version_file: ultimatesensor-v2/base.yaml
 
+  build-ultimatesensor-wifi-basic-cloud:
+    name: Build UltimateSensor WiFi Basic Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-wifi-basic-cloud.yaml
+      name: UltimateSensor WiFi Basic Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-wifi-basic-cloud
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-wifi-complete-cloud:
+    name: Build UltimateSensor WiFi Complete Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-wifi-complete-cloud.yaml
+      name: UltimateSensor WiFi Complete Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-wifi-complete-cloud
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-ethernet-basic-cloud:
+    name: Build UltimateSensor Ethernet Basic Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-ethernet-basic-cloud.yaml
+      name: UltimateSensor Ethernet Basic Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-ethernet-basic-cloud
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-ethernet-complete-cloud:
+    name: Build UltimateSensor Ethernet Complete Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v1_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v1/ultimatesensor-ethernet-complete-cloud.yaml
+      name: UltimateSensor Ethernet Complete Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-ethernet-complete-cloud
+      software_version: ${{ needs.detect-changes.outputs.v1_version }}
+
+  build-ultimatesensor-v2-wifi-basic-cloud:
+    name: Build UltimateSensor V2 WiFi Basic Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-cloud.yaml
+      name: UltimateSensor V2 WiFi Basic Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-basic-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-complete-cloud:
+    name: Build UltimateSensor V2 WiFi Complete Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-cloud.yaml
+      name: UltimateSensor V2 WiFi Complete Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-complete-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-basic-cloud:
+    name: Build UltimateSensor V2 Ethernet Basic Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-cloud.yaml
+      name: UltimateSensor V2 Ethernet Basic Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-basic-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-complete-cloud:
+    name: Build UltimateSensor V2 Ethernet Complete Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-cloud.yaml
+      name: UltimateSensor V2 Ethernet Complete Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-complete-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-basic-ld2460-cloud:
+    name: Build UltimateSensor V2 WiFi Basic LD2460 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460-cloud.yaml
+      name: UltimateSensor V2 WiFi Basic LD2460 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-basic-ld2460-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-wifi-complete-ld2460-cloud:
+    name: Build UltimateSensor V2 WiFi Complete LD2460 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460-cloud.yaml
+      name: UltimateSensor V2 WiFi Complete LD2460 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-wifi-complete-ld2460-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-basic-ld2460-cloud:
+    name: Build UltimateSensor V2 Ethernet Basic LD2460 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460-cloud.yaml
+      name: UltimateSensor V2 Ethernet Basic LD2460 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-basic-ld2460-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
+  build-ultimatesensor-v2-ethernet-complete-ld2460-cloud:
+    name: Build UltimateSensor V2 Ethernet Complete LD2460 Cloud
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.v2_build == 'true'
+    uses: ./.github/workflows/esphome-build.yml
+    with:
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460-cloud.yaml
+      name: UltimateSensor V2 Ethernet Complete LD2460 Cloud
+      clean: false
+      esphome_version: latest
+      directory_name: ultimatesensor-v2-ethernet-complete-ld2460-cloud
+      software_version: ${{ needs.detect-changes.outputs.v2_version }}
+      version_file: ultimatesensor-v2/base.yaml
+
   publish-gh-pages:
     name: Publish firmware to GitHub Pages
     needs:
@@ -589,14 +757,26 @@ jobs:
       - build-ultimatesensor-wifi-complete
       - build-ultimatesensor-ethernet-basic
       - build-ultimatesensor-ethernet-complete
+      - build-ultimatesensor-wifi-basic-cloud
+      - build-ultimatesensor-wifi-complete-cloud
+      - build-ultimatesensor-ethernet-basic-cloud
+      - build-ultimatesensor-ethernet-complete-cloud
       - build-ultimatesensor-v2-wifi-basic
       - build-ultimatesensor-v2-wifi-complete
       - build-ultimatesensor-v2-ethernet-basic
       - build-ultimatesensor-v2-ethernet-complete
+      - build-ultimatesensor-v2-wifi-basic-cloud
+      - build-ultimatesensor-v2-wifi-complete-cloud
+      - build-ultimatesensor-v2-ethernet-basic-cloud
+      - build-ultimatesensor-v2-ethernet-complete-cloud
       - build-ultimatesensor-v2-wifi-basic-ld2460
       - build-ultimatesensor-v2-wifi-complete-ld2460
       - build-ultimatesensor-v2-ethernet-basic-ld2460
       - build-ultimatesensor-v2-ethernet-complete-ld2460
+      - build-ultimatesensor-v2-wifi-basic-ld2460-cloud
+      - build-ultimatesensor-v2-wifi-complete-ld2460-cloud
+      - build-ultimatesensor-v2-ethernet-basic-ld2460-cloud
+      - build-ultimatesensor-v2-ethernet-complete-ld2460-cloud
     if: |
       always() &&
       github.event_name != 'pull_request' &&
@@ -606,14 +786,26 @@ jobs:
         needs.build-ultimatesensor-wifi-complete.result == 'success' ||
         needs.build-ultimatesensor-ethernet-basic.result == 'success' ||
         needs.build-ultimatesensor-ethernet-complete.result == 'success' ||
+        needs.build-ultimatesensor-wifi-basic-cloud.result == 'success' ||
+        needs.build-ultimatesensor-wifi-complete-cloud.result == 'success' ||
+        needs.build-ultimatesensor-ethernet-basic-cloud.result == 'success' ||
+        needs.build-ultimatesensor-ethernet-complete-cloud.result == 'success' ||
         needs.build-ultimatesensor-v2-wifi-basic.result == 'success' ||
         needs.build-ultimatesensor-v2-wifi-complete.result == 'success' ||
         needs.build-ultimatesensor-v2-ethernet-basic.result == 'success' ||
         needs.build-ultimatesensor-v2-ethernet-complete.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-basic-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-complete-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-basic-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-complete-cloud.result == 'success' ||
         needs.build-ultimatesensor-v2-wifi-basic-ld2460.result == 'success' ||
         needs.build-ultimatesensor-v2-wifi-complete-ld2460.result == 'success' ||
         needs.build-ultimatesensor-v2-ethernet-basic-ld2460.result == 'success' ||
-        needs.build-ultimatesensor-v2-ethernet-complete-ld2460.result == 'success'
+        needs.build-ultimatesensor-v2-ethernet-complete-ld2460.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-basic-ld2460-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-wifi-complete-ld2460-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-basic-ld2460-cloud.result == 'success' ||
+        needs.build-ultimatesensor-v2-ethernet-complete-ld2460-cloud.result == 'success'
       )
     runs-on: ubuntu-latest
     steps:
@@ -650,6 +842,34 @@ jobs:
           name: UltimateSensor Ethernet Complete
           path: output
 
+      - name: Download WiFi Basic Cloud artifact
+        if: needs.build-ultimatesensor-wifi-basic-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor WiFi Basic Cloud
+          path: output
+
+      - name: Download WiFi Complete Cloud artifact
+        if: needs.build-ultimatesensor-wifi-complete-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor WiFi Complete Cloud
+          path: output
+
+      - name: Download Ethernet Basic Cloud artifact
+        if: needs.build-ultimatesensor-ethernet-basic-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor Ethernet Basic Cloud
+          path: output
+
+      - name: Download Ethernet Complete Cloud artifact
+        if: needs.build-ultimatesensor-ethernet-complete-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor Ethernet Complete Cloud
+          path: output
+
       - name: Download V2 WiFi Basic artifact
         if: needs.build-ultimatesensor-v2-wifi-basic.result == 'success'
         uses: actions/download-artifact@v4
@@ -678,6 +898,34 @@ jobs:
           name: UltimateSensor V2 Ethernet Complete
           path: output
 
+      - name: Download V2 WiFi Basic Cloud artifact
+        if: needs.build-ultimatesensor-v2-wifi-basic-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Basic Cloud
+          path: output
+
+      - name: Download V2 WiFi Complete Cloud artifact
+        if: needs.build-ultimatesensor-v2-wifi-complete-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Complete Cloud
+          path: output
+
+      - name: Download V2 Ethernet Basic Cloud artifact
+        if: needs.build-ultimatesensor-v2-ethernet-basic-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Basic Cloud
+          path: output
+
+      - name: Download V2 Ethernet Complete Cloud artifact
+        if: needs.build-ultimatesensor-v2-ethernet-complete-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Complete Cloud
+          path: output
+
       - name: Download V2 WiFi Basic LD2460 artifact
         if: needs.build-ultimatesensor-v2-wifi-basic-ld2460.result == 'success'
         uses: actions/download-artifact@v4
@@ -704,6 +952,34 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: UltimateSensor V2 Ethernet Complete LD2460
+          path: output
+
+      - name: Download V2 WiFi Basic LD2460 Cloud artifact
+        if: needs.build-ultimatesensor-v2-wifi-basic-ld2460-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Basic LD2460 Cloud
+          path: output
+
+      - name: Download V2 WiFi Complete LD2460 Cloud artifact
+        if: needs.build-ultimatesensor-v2-wifi-complete-ld2460-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 WiFi Complete LD2460 Cloud
+          path: output
+
+      - name: Download V2 Ethernet Basic LD2460 Cloud artifact
+        if: needs.build-ultimatesensor-v2-ethernet-basic-ld2460-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Basic LD2460 Cloud
+          path: output
+
+      - name: Download V2 Ethernet Complete LD2460 Cloud artifact
+        if: needs.build-ultimatesensor-v2-ethernet-complete-ld2460-cloud.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: UltimateSensor V2 Ethernet Complete LD2460 Cloud
           path: output
 
       - name: Create manifests
@@ -739,14 +1015,26 @@ jobs:
           create_manifest "ultimatesensor-wifi-complete" "ultimatesensor-wifi-complete-manifest.json" "UltimateSensor WiFi Complete" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-basic" "ultimatesensor-ethernet-basic-manifest.json" "UltimateSensor Ethernet Basic" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-complete" "ultimatesensor-ethernet-complete-manifest.json" "UltimateSensor Ethernet Complete" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-wifi-basic-cloud" "ultimatesensor-wifi-basic-cloud-manifest.json" "UltimateSensor WiFi Basic Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-wifi-complete-cloud" "ultimatesensor-wifi-complete-cloud-manifest.json" "UltimateSensor WiFi Complete Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-ethernet-basic-cloud" "ultimatesensor-ethernet-basic-cloud-manifest.json" "UltimateSensor Ethernet Basic Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
+          create_manifest "ultimatesensor-ethernet-complete-cloud" "ultimatesensor-ethernet-complete-cloud-manifest.json" "UltimateSensor Ethernet Complete Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-v2-wifi-basic" "ultimatesensor-v2-wifi-basic-manifest.json" "UltimateSensor V2 WiFi Basic" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-wifi-complete" "ultimatesensor-v2-wifi-complete-manifest.json" "UltimateSensor V2 WiFi Complete" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-ethernet-basic" "ultimatesensor-v2-ethernet-basic-manifest.json" "UltimateSensor V2 Ethernet Basic" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-ethernet-complete" "ultimatesensor-v2-ethernet-complete-manifest.json" "UltimateSensor V2 Ethernet Complete" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-basic-cloud" "ultimatesensor-v2-wifi-basic-cloud-manifest.json" "UltimateSensor V2 WiFi Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-complete-cloud" "ultimatesensor-v2-wifi-complete-cloud-manifest.json" "UltimateSensor V2 WiFi Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-basic-cloud" "ultimatesensor-v2-ethernet-basic-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-complete-cloud" "ultimatesensor-v2-ethernet-complete-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-wifi-basic-ld2460" "ultimatesensor-v2-wifi-basic-ld2460-manifest.json" "UltimateSensor V2 WiFi Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-wifi-complete-ld2460" "ultimatesensor-v2-wifi-complete-ld2460-manifest.json" "UltimateSensor V2 WiFi Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-ethernet-basic-ld2460" "ultimatesensor-v2-ethernet-basic-ld2460-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
           create_manifest "ultimatesensor-v2-ethernet-complete-ld2460" "ultimatesensor-v2-ethernet-complete-ld2460-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-basic-ld2460-cloud" "ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-complete-ld2460-cloud" "ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460-cloud" "ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460-cloud" "ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
 
       - name: Create README for gh-pages
         shell: bash
@@ -768,14 +1056,26 @@ jobs:
           - `ultimatesensor-wifi-complete/`
           - `ultimatesensor-ethernet-basic/`
           - `ultimatesensor-ethernet-complete/`
+          - `ultimatesensor-wifi-basic-cloud/`
+          - `ultimatesensor-wifi-complete-cloud/`
+          - `ultimatesensor-ethernet-basic-cloud/`
+          - `ultimatesensor-ethernet-complete-cloud/`
           - `ultimatesensor-v2-wifi-basic/`
           - `ultimatesensor-v2-wifi-complete/`
           - `ultimatesensor-v2-ethernet-basic/`
           - `ultimatesensor-v2-ethernet-complete/`
+          - `ultimatesensor-v2-wifi-basic-cloud/`
+          - `ultimatesensor-v2-wifi-complete-cloud/`
+          - `ultimatesensor-v2-ethernet-basic-cloud/`
+          - `ultimatesensor-v2-ethernet-complete-cloud/`
           - `ultimatesensor-v2-wifi-basic-ld2460/`
           - `ultimatesensor-v2-wifi-complete-ld2460/`
           - `ultimatesensor-v2-ethernet-basic-ld2460/`
           - `ultimatesensor-v2-ethernet-complete-ld2460/`
+          - `ultimatesensor-v2-wifi-basic-ld2460-cloud/`
+          - `ultimatesensor-v2-wifi-complete-ld2460-cloud/`
+          - `ultimatesensor-v2-ethernet-basic-ld2460-cloud/`
+          - `ultimatesensor-v2-ethernet-complete-ld2460-cloud/`
           - `*-manifest.json` aggregate manifests for OTA and ESP Web Tools
 
           ## Aggregate manifest URLs
@@ -841,7 +1141,7 @@ jobs:
             fi
 
             awk -v heading="$heading" '
-              $0 == heading { found=1; next }
+              index($0, heading) == 1 { found=1; next }
               found && /^## \[/ { exit }
               found { print }
             ' CHANGELOG.md > release-notes.txt
@@ -853,6 +1153,9 @@ jobs:
                 found { print }
               ' CHANGELOG.md > release-notes.txt
             fi
+
+            sed -i '/^- Add customer-facing firmware notes here before merging a PR\.$/d' release-notes.txt
+            sed -i '/^- Add customer-facing changes here before the next release is published\.$/d' release-notes.txt
 
             if [[ ! -s release-notes.txt ]]; then
               printf '%s\n\n%s\n' \

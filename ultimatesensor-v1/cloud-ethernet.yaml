@@ -1,0 +1,14 @@
+# UltimateSensor V1 Ethernet cloud identity sensors.
+
+text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      id: ethernet_ip
+      name: "Ethernet IP Address"
+      entity_category: diagnostic
+      disabled_by_default: true
+    mac_address:
+      id: ethernet_mac
+      name: "Ethernet MAC Address"
+      entity_category: diagnostic
+      disabled_by_default: true

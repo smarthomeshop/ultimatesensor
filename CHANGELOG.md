@@ -6,7 +6,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+- Added SmartHomeShop App cloud firmware variants for UltimateSensor V1 WiFi and Ethernet Basic/Complete firmware.
+- Added SmartHomeShop App cloud firmware variants for UltimateSensor V2 WiFi, Ethernet, LD2450, and optional LD2460 firmware families.
+- Fixed GitHub Release note extraction so dated changelog headings publish the matching customer-facing notes.
+- Added cloud payload IDs for VOC, NOx, occupancy, and LD2450 zone target counts.
 
 ## [UltimateSensor V2 1.0] - 2026-05-31
 

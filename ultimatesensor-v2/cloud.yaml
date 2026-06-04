@@ -1,0 +1,369 @@
+# UltimateSensor Cloud Integration
+# Optional SmartHomeShop cloud sync over HTTP POST.
+
+json:
+
+substitutions:
+  cloud_enabled: "true"
+  cloud_api_url: "https://api.smarthomeshop.io"
+  cloud_api_version: "v1"
+  cloud_sync_interval: "60s"
+  cloud_mac_sensor_id: wifi_mac
+  cloud_ip_sensor_id: wifi_ip
+
+http_request:
+  useragent: ultimatesensor-cloud-esphome
+  verify_ssl: false
+  timeout: 10s
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 10s
+        - if:
+            condition:
+              lambda: "return !id(cloud_is_registered);"
+            then:
+              - script.execute: cloud_register
+
+time:
+  - platform: sntp
+    id: sntp_cloud_time
+    timezone: "Europe/Amsterdam"
+    servers:
+      - "pool.ntp.org"
+      - "time.google.com"
+
+globals:
+  - id: cloud_device_token
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: cloud_device_id
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: cloud_is_registered
+    type: bool
+    restore_value: true
+    initial_value: "false"
+  - id: cloud_is_registering
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_last_sync_success
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_sync_failures
+    type: int
+    restore_value: false
+    initial_value: "0"
+
+  - id: cloud_has_pm
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_pm_1_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pm_2_5
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pm_4_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pm_10_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pmc_0_5
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pmc_1_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pmc_2_5
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pmc_4_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pmc_10_0
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+  - id: cloud_pm_size
+    type: float
+    restore_value: false
+    initial_value: "NAN"
+
+  - id: cloud_has_zones
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: cloud_zone1_count
+    type: int
+    restore_value: false
+    initial_value: "-1"
+  - id: cloud_zone2_count
+    type: int
+    restore_value: false
+    initial_value: "-1"
+  - id: cloud_zone3_count
+    type: int
+    restore_value: false
+    initial_value: "-1"
+  - id: cloud_zone4_count
+    type: int
+    restore_value: false
+    initial_value: "-1"
+
+button:
+  - platform: template
+    id: cloud_reset_button
+    name: "${friendly_name} Reset Cloud"
+    icon: "mdi:cloud-off"
+    entity_category: config
+    on_press:
+      - script.execute: cloud_reset
+
+binary_sensor:
+  - platform: template
+    id: cloud_connected
+    name: "${friendly_name} Cloud Connected"
+    icon: "mdi:cloud-check"
+    entity_category: diagnostic
+    lambda: |-
+      return id(cloud_is_registered) && id(cloud_last_sync_success);
+
+sensor:
+  - platform: template
+    id: cloud_sync_failure_count
+    name: "${friendly_name} Cloud Sync Failures"
+    entity_category: diagnostic
+    icon: "mdi:alert-circle"
+    accuracy_decimals: 0
+    lambda: "return id(cloud_sync_failures);"
+    update_interval: 60s
+
+text_sensor:
+  - platform: template
+    id: cloud_device_id_sensor
+    name: "${friendly_name} Cloud Device ID"
+    entity_category: diagnostic
+    icon: "mdi:cloud-outline"
+    lambda: |-
+      if (id(cloud_device_id).length() > 0) {
+        return id(cloud_device_id);
+      }
+      return {"Not registered"};
+    update_interval: 60s
+
+  - platform: template
+    id: cloud_status_text
+    name: "${friendly_name} Cloud Status"
+    entity_category: diagnostic
+    icon: "mdi:cloud-question"
+    lambda: |-
+      if (!id(cloud_is_registered)) {
+        return {"Registering..."};
+      }
+      if (id(cloud_device_token).length() == 0) {
+        return {"No token"};
+      }
+      if (id(cloud_sync_failures) > 10) {
+        return {"Error"};
+      }
+      if (id(cloud_last_sync_success)) {
+        return {"Connected"};
+      }
+      return {"Syncing..."};
+    update_interval: 15s
+
+script:
+  - id: cloud_register
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: "return id(cloud_is_registering);"
+          then:
+            - script.stop: cloud_register
+
+      - lambda: "id(cloud_is_registering) = true;"
+
+      - wait_until:
+          condition:
+            lambda: "return id(${cloud_mac_sensor_id}).has_state();"
+          timeout: 30s
+
+      - wait_until:
+          condition:
+            lambda: "return id(${cloud_ip_sensor_id}).has_state();"
+          timeout: 30s
+
+      - http_request.post:
+          url: "${cloud_api_url}/api/${cloud_api_version}/devices/register"
+          request_headers:
+            Content-Type: "application/json"
+            User-Agent: "UltimateSensor/${ultimatesensor_software_version}"
+            Accept: "application/json"
+          json: |-
+            root["mac_address"] = id(${cloud_mac_sensor_id}).state;
+            root["hardware_version"] = "${ultimatesensor_hardware_version}";
+            root["firmware_version"] = "${ultimatesensor_software_version}";
+            root["product"] = "ultimatesensor";
+            root["local_ip"] = id(${cloud_ip_sensor_id}).state;
+          capture_response: true
+          max_response_buffer_size: 512
+          on_response:
+            then:
+              - lambda: |-
+                  id(cloud_is_registering) = false;
+
+                  if (response->status_code == 200 || response->status_code == 201) {
+                    json::parse_json(body, [](JsonObject root) -> bool {
+                      if (root["device_id"].is<const char*>() && root["token"].is<const char*>()) {
+                        id(cloud_device_id) = root["device_id"].as<std::string>();
+                        id(cloud_device_token) = root["token"].as<std::string>();
+                        id(cloud_is_registered) = true;
+                        id(cloud_sync_failures) = 0;
+                        return true;
+                      }
+                      return false;
+                    });
+                  } else {
+                    id(cloud_sync_failures)++;
+                  }
+          on_error:
+            then:
+              - lambda: |-
+                  id(cloud_sync_failures)++;
+                  id(cloud_is_registering) = false;
+
+  - id: cloud_send_batch
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: "return !id(cloud_is_registered);"
+          then:
+            - script.execute: cloud_register
+            - script.stop: cloud_send_batch
+
+      - if:
+          condition:
+            lambda: "return id(cloud_device_token).length() == 0;"
+          then:
+            - lambda: "id(cloud_is_registered) = false;"
+            - script.execute: cloud_register
+            - script.stop: cloud_send_batch
+
+      - lambda: "id(cloud_last_sync_success) = false;"
+
+      - http_request.post:
+          url: "${cloud_api_url}/api/${cloud_api_version}/devices/ingest"
+          request_headers:
+            Content-Type: "application/json"
+            Authorization: !lambda |-
+              static std::string auth;
+              auth = "Bearer ";
+              auth += id(cloud_device_token);
+              return auth.c_str();
+            User-Agent: "UltimateSensor/${ultimatesensor_software_version}"
+            Accept: "application/json"
+          capture_response: true
+          max_response_buffer_size: 256
+          json: |-
+            root["device_id"] = id(cloud_device_id);
+            root["timestamp"] = id(sntp_cloud_time).now().timestamp;
+
+            if (id(scd41_co2).has_state() && !isnan(id(scd41_co2).state)) {
+              root["co2_ppm"] = id(scd41_co2).state;
+            }
+            if (id(scd41_temperature).has_state() && !isnan(id(scd41_temperature).state)) {
+              root["temperature_c"] = id(scd41_temperature).state;
+            }
+            if (id(scd41_humidity).has_state() && !isnan(id(scd41_humidity).state)) {
+              root["humidity_pct"] = id(scd41_humidity).state;
+            }
+            if (id(illuminance).has_state() && !isnan(id(illuminance).state)) {
+              root["illuminance_lux"] = id(illuminance).state;
+            }
+            if (id(voc_index).has_state() && !isnan(id(voc_index).state)) {
+              root["voc_index"] = id(voc_index).state;
+            }
+            if (id(nox_index).has_state() && !isnan(id(nox_index).state)) {
+              root["nox_index"] = id(nox_index).state;
+            }
+
+            root["occupancy"] = id(occupancy).state;
+
+            if (id(cloud_has_zones)) {
+              if (id(cloud_zone1_count) >= 0) root["zone1_target_count"] = id(cloud_zone1_count);
+              if (id(cloud_zone2_count) >= 0) root["zone2_target_count"] = id(cloud_zone2_count);
+              if (id(cloud_zone3_count) >= 0) root["zone3_target_count"] = id(cloud_zone3_count);
+              if (id(cloud_zone4_count) >= 0) root["zone4_target_count"] = id(cloud_zone4_count);
+            }
+
+            if (id(cloud_has_pm)) {
+              if (!isnan(id(cloud_pm_1_0))) root["pm_1_0_ugm3"] = id(cloud_pm_1_0);
+              if (!isnan(id(cloud_pm_2_5))) root["pm_2_5_ugm3"] = id(cloud_pm_2_5);
+              if (!isnan(id(cloud_pm_4_0))) root["pm_4_0_ugm3"] = id(cloud_pm_4_0);
+              if (!isnan(id(cloud_pm_10_0))) root["pm_10_0_ugm3"] = id(cloud_pm_10_0);
+              if (!isnan(id(cloud_pmc_0_5))) root["pmc_0_5"] = id(cloud_pmc_0_5);
+              if (!isnan(id(cloud_pmc_1_0))) root["pmc_1_0"] = id(cloud_pmc_1_0);
+              if (!isnan(id(cloud_pmc_2_5))) root["pmc_2_5"] = id(cloud_pmc_2_5);
+              if (!isnan(id(cloud_pmc_4_0))) root["pmc_4_0"] = id(cloud_pmc_4_0);
+              if (!isnan(id(cloud_pmc_10_0))) root["pmc_10_0"] = id(cloud_pmc_10_0);
+              if (!isnan(id(cloud_pm_size))) root["pm_size"] = id(cloud_pm_size);
+            }
+
+            root["firmware_version"] = "${ultimatesensor_software_version}";
+            root["hardware_version"] = "${ultimatesensor_hardware_version}";
+          on_response:
+            then:
+              - lambda: |-
+                  if (response->status_code == 200) {
+                    id(cloud_last_sync_success) = true;
+                    id(cloud_sync_failures) = 0;
+                  } else if (response->status_code == 401) {
+                    id(cloud_is_registered) = false;
+                    id(cloud_device_token) = "";
+                    id(cloud_sync_failures)++;
+                  } else {
+                    id(cloud_sync_failures)++;
+                  }
+          on_error:
+            then:
+              - lambda: |-
+                  id(cloud_last_sync_success) = false;
+                  id(cloud_sync_failures)++;
+
+  - id: cloud_reset
+    mode: single
+    then:
+      - lambda: |-
+          id(cloud_device_id) = "";
+          id(cloud_device_token) = "";
+          id(cloud_is_registered) = false;
+          id(cloud_last_sync_success) = false;
+          id(cloud_sync_failures) = 0;
+          id(cloud_has_pm) = false;
+          id(cloud_has_zones) = false;
+      - delay: 5s
+      - script.execute: cloud_register
+
+interval:
+  - interval: ${cloud_sync_interval}
+    then:
+      - script.execute: cloud_send_batch
