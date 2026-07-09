@@ -12,14 +12,16 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 
 - Updated UltimateSensor V1 LAN8720 Ethernet clock configuration for ESPHome 2026.7 compatibility.
-- Added UltimateSensor V2 boot sound and a three-LED left-to-right boot animation.
+- Added faster cloud presence updates for occupancy and zone counts.
+- Replaced the cloud firmware status LED behavior so cloud-only devices blink while offline and stay off once online.
 
 
 ## [UltimateSensor V2 1.2] - 2026-07-09
 
 
-- Updated UltimateSensor V1 LAN8720 Ethernet clock configuration for ESPHome 2026.7 compatibility.
 - Added UltimateSensor V2 boot sound and a three-LED left-to-right boot animation.
+- Added faster cloud presence updates for occupancy and zone counts.
+- Replaced the cloud firmware status LED behavior so cloud-only devices blink while offline and stay off once online.
 
 
 ## [UltimateSensor V1 1.9] - 2026-06-04
