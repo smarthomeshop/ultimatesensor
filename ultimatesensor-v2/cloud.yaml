@@ -8,6 +8,7 @@ substitutions:
   cloud_api_url: "https://api.smarthomeshop.io"
   cloud_api_version: "v1"
   cloud_sync_interval: "60s"
+  cloud_presence_sync_interval: "10s"
   cloud_mac_sensor_id: wifi_mac
   cloud_ip_sensor_id: wifi_ip
 
@@ -60,6 +61,10 @@ globals:
     type: int
     restore_value: false
     initial_value: "0"
+  - id: cloud_last_presence_signature
+    type: int
+    restore_value: false
+    initial_value: "-1"
 
   - id: cloud_has_pm
     type: bool
@@ -360,10 +365,70 @@ script:
           id(cloud_sync_failures) = 0;
           id(cloud_has_pm) = false;
           id(cloud_has_zones) = false;
+          id(cloud_last_presence_signature) = -1;
       - delay: 5s
       - script.execute: cloud_register
 
+  - id: cloud_send_presence_if_changed
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: |-
+              int signature = id(occupancy).state ? 1 : 0;
+              if (id(cloud_has_zones)) {
+                signature = signature * 31 + id(cloud_zone1_count);
+                signature = signature * 31 + id(cloud_zone2_count);
+                signature = signature * 31 + id(cloud_zone3_count);
+                signature = signature * 31 + id(cloud_zone4_count);
+              }
+              return signature == id(cloud_last_presence_signature);
+          then:
+            - script.stop: cloud_send_presence_if_changed
+      - lambda: |-
+          int signature = id(occupancy).state ? 1 : 0;
+          if (id(cloud_has_zones)) {
+            signature = signature * 31 + id(cloud_zone1_count);
+            signature = signature * 31 + id(cloud_zone2_count);
+            signature = signature * 31 + id(cloud_zone3_count);
+            signature = signature * 31 + id(cloud_zone4_count);
+          }
+          id(cloud_last_presence_signature) = signature;
+      - script.execute: cloud_send_batch
+
+# Cloud firmware status LED: the built-in status_led keeps blinking on the
+# ESPHome API "waiting for client connection" warning, which is the normal
+# state for cloud-only customers without Home Assistant. Replace it with
+# connectivity behaviour: blink while offline or not set up, off once online.
+status_led: !remove
+
+output:
+  - platform: gpio
+    pin: GPIO19  # same pin the removed status_led used
+    id: cloud_status_led_output
+
 interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          static bool cloud_led_on = false;
+          if (network::is_connected()) {
+            if (cloud_led_on) {
+              id(cloud_status_led_output).turn_off();
+              cloud_led_on = false;
+            }
+          } else {
+            cloud_led_on = !cloud_led_on;
+            if (cloud_led_on) {
+              id(cloud_status_led_output).turn_on();
+            } else {
+              id(cloud_status_led_output).turn_off();
+            }
+          }
+  - interval: ${cloud_presence_sync_interval}
+    then:
+      - script.execute: cloud_send_presence_if_changed
+
   - interval: ${cloud_sync_interval}
     then:
       - script.execute: cloud_send_batch

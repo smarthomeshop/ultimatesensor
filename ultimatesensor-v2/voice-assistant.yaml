@@ -174,8 +174,13 @@ script:
   - id: reset_voice_led
     mode: restart
     then:
-      - light.turn_off:
-          id: rgb_front_led
+      - if:
+          condition:
+            lambda: |-
+              return !id(boot_animation_active);
+          then:
+            - light.turn_off:
+                id: rgb_front_led
 
 switch:
   - platform: template

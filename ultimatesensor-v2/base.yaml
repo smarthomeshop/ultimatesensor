@@ -7,6 +7,10 @@ substitutions:
   scd41_temperature_offset: "0.0"
   scd41_humidity_offset: "3.0"
   speaker_volume: "60%"
+  boot_sound_enabled: "true"
+  boot_sound_volume: "50%"
+  boot_sound_duration: "10s"
+  boot_sound_file: "audio/boot1.mp3"
 
 esphome:
   name: ${device_name}
@@ -26,6 +30,16 @@ esphome:
         - media_player.volume_set:
             id: media_player_01
             volume: ${speaker_volume}
+    - priority: 250
+      then:
+        - delay: 1s
+        - script.execute: play_boot_sound_and_animation
+
+globals:
+  - id: boot_animation_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -112,6 +126,24 @@ light:
           name: "Wake Sweep"
           move_interval: 220ms
           scan_width: 2
+      - addressable_lambda:
+          name: "Boot Sweep"
+          update_interval: 130ms
+          lambda: |-
+            static uint8_t step = 0;
+            if (initial_run) {
+              step = 0;
+            }
+
+            for (int i = 0; i < it.size(); i++) {
+              it[i] = Color(0, 0, 0);
+            }
+
+            const int head = step % it.size();
+            const int tail = (head + it.size() - 1) % it.size();
+            it[tail] = Color(0, 30, 120);
+            it[head] = Color(0, 180, 255);
+            step = (step + 1) % it.size();
 
 i2c:
   - id: bus_a
@@ -178,6 +210,9 @@ media_player:
   - platform: speaker
     id: media_player_01
     name: "Media Player"
+    files:
+      - id: boot_sound_file
+        file: "${boot_sound_file}"
     media_pipeline:
       speaker: media_spk_resampling_input
       num_channels: 1
@@ -186,6 +221,41 @@ media_player:
       speaker: announcement_spk_resampling_input
       num_channels: 1
       format: NONE
+
+script:
+  - id: play_boot_sound_and_animation
+    mode: restart
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_on: boot_sound_switch
+              - lambda: |-
+                  return std::string("${boot_sound_enabled}") == "true";
+          then:
+            - lambda: id(boot_animation_active) = true;
+            - media_player.volume_set:
+                id: media_player_01
+                volume: ${boot_sound_volume}
+            - light.turn_on:
+                id: rgb_front_led
+                brightness: 80%
+                effect: "Boot Sweep"
+            - media_player.speaker.play_on_device_media_file:
+                id: media_player_01
+                media_file: boot_sound_file
+                announcement: true
+            - delay: ${boot_sound_duration}
+            - lambda: id(boot_animation_active) = false;
+            - light.turn_off:
+                id: rgb_front_led
+            - media_player.volume_set:
+                id: media_player_01
+                volume: ${speaker_volume}
+          else:
+            - logger.log:
+                level: INFO
+                format: "Boot sound and animation disabled"
 
 sensor:
   - platform: uptime
@@ -336,6 +406,14 @@ number:
       entity_category: config
 
 switch:
+  - platform: template
+    id: boot_sound_switch
+    name: "Boot Sound & Animation"
+    icon: mdi:volume-high
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+
   - platform: ld2412
     ld2412_id: ld2412_radar
     engineering_mode:
