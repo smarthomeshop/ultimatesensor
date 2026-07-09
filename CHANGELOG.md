@@ -7,8 +7,20 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 ## [Unreleased]
 
 - Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 1.10] - 2026-07-09
+
+
 - Updated UltimateSensor V1 LAN8720 Ethernet clock configuration for ESPHome 2026.7 compatibility.
 - Added UltimateSensor V2 boot sound and a three-LED left-to-right boot animation.
+
+
+## [UltimateSensor V2 1.2] - 2026-07-09
+
+
+- Updated UltimateSensor V1 LAN8720 Ethernet clock configuration for ESPHome 2026.7 compatibility.
+- Added UltimateSensor V2 boot sound and a three-LED left-to-right boot animation.
+
 
 ## [UltimateSensor V1 1.9] - 2026-06-04
 
