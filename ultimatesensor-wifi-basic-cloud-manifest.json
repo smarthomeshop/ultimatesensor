@@ -8,7 +8,7 @@
       "chipFamily": "ESP32",
       "ota": {
         "path": "ultimatesensor-wifi-basic-cloud/ultimatesensor-esp32.ota.bin",
-        "md5": "9b11b586a4ce41a558940ad763c71b41"
+        "md5": "5670116ca1a2f952fcc98259d8295672"
       },
       "parts": [
         {
