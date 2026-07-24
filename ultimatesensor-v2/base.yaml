@@ -11,6 +11,9 @@ substitutions:
   boot_sound_volume: "50%"
   boot_sound_duration: "10s"
   boot_sound_file: "audio/boot1.mp3"
+  voice_not_configured_volume: "50%"
+  voice_not_configured_duration: "5s"
+  voice_not_configured_file: "audio/voice-not-configured.wav"
 
 esphome:
   name: ${device_name}
@@ -77,6 +80,14 @@ ota:
 
 web_server:
   port: 80
+  version: 3
+  sorting_groups:
+    - id: sorting_group_air_quality
+      name: "Air Quality"
+      sorting_weight: 10
+    - id: sorting_group_presence
+      name: "Presence"
+      sorting_weight: 20
 
 status_led:
   pin: GPIO19
@@ -190,7 +201,7 @@ speaker:
     i2s_audio_id: i2s_out
     i2s_dout_pin: GPIO17
     dac_type: external
-    sample_rate: 41000
+    sample_rate: 48000
     bits_per_sample: 16bit
     channel: mono
   - platform: mixer
@@ -213,6 +224,8 @@ media_player:
     files:
       - id: boot_sound_file
         file: "${boot_sound_file}"
+      - id: voice_not_configured_file
+        file: "${voice_not_configured_file}"
     media_pipeline:
       speaker: media_spk_resampling_input
       num_channels: 1
@@ -287,14 +300,23 @@ sensor:
     co2:
       id: scd41_co2
       name: "SCD41 CO2"
+      web_server:
+        sorting_group_id: sorting_group_air_quality
+        sorting_weight: 1
     temperature:
       id: scd41_temperature
       name: "SCD41 Temperature"
+      web_server:
+        sorting_group_id: sorting_group_air_quality
+        sorting_weight: 2
       filters:
         - lambda: return x + ${scd41_temperature_offset};
     humidity:
       id: scd41_humidity
       name: "SCD41 Humidity"
+      web_server:
+        sorting_group_id: sorting_group_air_quality
+        sorting_weight: 3
       filters:
         - lambda: return x + ${scd41_humidity_offset};
     measurement_mode: low_power_periodic
@@ -305,6 +327,9 @@ sensor:
   - platform: bh1750
     id: illuminance
     name: "BH1750 Illuminance"
+    web_server:
+      sorting_group_id: sorting_group_air_quality
+      sorting_weight: 6
     address: 0x23
     update_interval: 60s
 
@@ -313,9 +338,15 @@ sensor:
     voc:
       id: voc_index
       name: "VOC Index"
+      web_server:
+        sorting_group_id: sorting_group_air_quality
+        sorting_weight: 4
     nox:
       id: nox_index
       name: "NOx Index"
+      web_server:
+        sorting_group_id: sorting_group_air_quality
+        sorting_weight: 5
     compensation:
       humidity_source: scd41_humidity
       temperature_source: scd41_temperature
@@ -325,14 +356,29 @@ sensor:
     ld2412_id: ld2412_radar
     moving_distance:
       name: "LD2412 Moving Distance"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 6
     still_distance:
       name: "LD2412 Still Distance"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 7
     moving_energy:
       name: "LD2412 Moving Energy"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 8
     still_energy:
       name: "LD2412 Still Energy"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 9
     detection_distance:
       name: "LD2412 Detection Distance"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 5
     light:
       name: "LD2412 Light"
 
@@ -357,12 +403,21 @@ binary_sensor:
     has_target:
       id: ld2412_presence
       name: "LD2412 Presence"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 2
       device_class: occupancy
     has_moving_target:
       name: "LD2412 Moving Target"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 3
       device_class: motion
     has_still_target:
       name: "LD2412 Still Target"
+      web_server:
+        sorting_group_id: sorting_group_presence
+        sorting_weight: 4
       device_class: occupancy
     dynamic_background_correction_status:
       name: "LD2412 Dynamic Background Correction"
@@ -371,6 +426,9 @@ binary_sensor:
   - platform: template
     id: occupancy
     name: "Occupancy"
+    web_server:
+      sorting_group_id: sorting_group_presence
+      sorting_weight: 1
     device_class: occupancy
     lambda: |-
       return id(pir_motion).state || id(ld2412_presence).state || id(tracking_presence).state;

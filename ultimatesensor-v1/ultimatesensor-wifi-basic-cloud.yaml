@@ -6,12 +6,13 @@ substitutions:
   ultimatesensor_software_version: "1.10"
   ultimatesensor_hardware_version: "V1-Basic"
   ultimatesensor_connection_type: "WiFi"
-  wifi_fast_connect: "true"
+  wifi_fast_connect: "false"
   cloud_mac_sensor_id: wifi_mac
   cloud_ip_sensor_id: wifi_ip
 
 packages:
   base: !include base.yaml
+  ld2450_zones: !include zones.yaml
   net: !include wifi.yaml
   cloud: !include cloud.yaml
   zones: !include cloud-zones.yaml

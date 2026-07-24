@@ -6,7 +6,7 @@ substitutions:
   friendly_name: "UltimateSensor V2"
   ultimatesensor_hardware_version: "V2-Basic"
   ultimatesensor_connection_type: "WiFi"
-  wifi_fast_connect: "true"
+  wifi_fast_connect: "false"
 
 packages:
   base: !include base.yaml

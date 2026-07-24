@@ -54,6 +54,7 @@ micro_wake_word:
     - delay: 250ms
     - voice_assistant.start:
         wake_word: !lambda return wake_word;
+    - script.execute: recover_wake_word
 
 voice_assistant:
   id: voice_assistant_01
@@ -64,7 +65,9 @@ voice_assistant:
   auto_gain: 31dBFS
   noise_suppression_level: 2
   on_client_connected:
-    - lambda: id(init_in_progress) = false;
+    - lambda: |-
+        id(init_in_progress) = false;
+        id(voice_client_connected) = true;
     - if:
         condition:
           switch.is_on: use_wake_word
@@ -75,7 +78,9 @@ voice_assistant:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
           - script.execute: reset_voice_led
   on_client_disconnected:
-    - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - lambda: |-
+        id(voice_client_connected) = false;
+        id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
     - voice_assistant.stop:
     - micro_wake_word.stop:
     - if:
@@ -152,6 +157,44 @@ voice_assistant:
           - script.execute: reset_voice_led
 
 script:
+  # voice_assistant.start does not fire on_error when no HA voice client is
+  # connected. Recover local detection if that start attempt stayed idle.
+  - id: recover_wake_word
+    mode: restart
+    then:
+      - delay: 2s
+      - if:
+          condition:
+            and:
+              - switch.is_on: use_wake_word
+              - lambda: return !id(voice_client_connected);
+              - not:
+                  voice_assistant.is_running:
+              - not:
+                  micro_wake_word.is_running:
+          then:
+            - logger.log: "Voice pipeline unavailable; restarting local wake word"
+            - light.turn_on:
+                id: rgb_front_led
+                red: 100%
+                green: 15%
+                blue: 0%
+                brightness: 80%
+                effect: none
+            - media_player.volume_set:
+                id: media_player_01
+                volume: ${voice_not_configured_volume}
+            - media_player.speaker.play_on_device_media_file:
+                id: media_player_01
+                media_file: voice_not_configured_file
+                announcement: true
+            - delay: ${voice_not_configured_duration}
+            - media_player.volume_set:
+                id: media_player_01
+                volume: ${speaker_volume}
+            - micro_wake_word.start:
+            - script.execute: reset_voice_led
+
   - id: start_wake_word
     mode: restart
     then:
@@ -217,6 +260,11 @@ button:
       - voice_assistant.start:
 
 globals:
+  - id: voice_client_connected
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
   - id: init_in_progress
     type: bool
     restore_value: no

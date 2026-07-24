@@ -11,6 +11,7 @@ substitutions:
 
 packages:
   base: !include base.yaml
+  ld2450_zones: !include zones.yaml
   net: !include ethernet.yaml
   cloud_net: !include cloud-ethernet.yaml
   cloud: !include cloud.yaml

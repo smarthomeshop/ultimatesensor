@@ -9,8 +9,8 @@ Leave the LD2412 installed. LD2412 and PIR remain reliable presence fallbacks an
 | Package | Purpose |
 | --- | --- |
 | `base.yaml` | Shared ESP32-S3 hardware, sensors, PIR, LD2412, microphone, speaker, media player, API, OTA, and combined occupancy logic |
-| `tracking-ld2450.yaml` | Standard factory tracking package for LD2450 on GPIO11/GPIO12 |
-| `tracking-ld2460.yaml` | Optional upgrade tracking package for LD2460 on GPIO6/GPIO5 via `smarthomeshop/ld2460` |
+| `tracking-ld2450.yaml` | Product pin wrapper for shared LD2450 tracking and Room Designer zones on GPIO11/GPIO12 |
+| `tracking-ld2460.yaml` | Product pin wrapper for shared LD2460 tracking and Room Designer zones on GPIO6/GPIO5 |
 | `wifi.yaml` | WiFi firmware network stack, captive portal, Improv, WiFi diagnostics, Ethernet power off |
 | `ethernet.yaml` | W5500 Ethernet firmware network stack and Ethernet diagnostics |
 | `voice-assistant.yaml` | Local wake word and Home Assistant voice assistant package |
@@ -45,7 +45,9 @@ ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi varia
 - Do not remove LD2412 for normal installs. It is the reliable close-range/still-presence fallback.
 - `Occupancy` is always `PIR motion OR LD2412 presence OR tracking radar presence`.
 - The standard LD2450 firmware exposes Bluetooth/configuration controls for the LD2450.
-- The LD2460 firmware uses the external component package from `github://smarthomeshop/ld2460/tracking-ld2460.yaml@v0.1.1`.
+- LD2450 tracking and zones are maintained centrally in `smarthomeshop/ld2450`.
+- LD2460 tracking and zones are maintained centrally in `smarthomeshop/ld2460`.
+- These local tracking files only select the correct product pins and shared packages.
 
 ## Pin Map
 
