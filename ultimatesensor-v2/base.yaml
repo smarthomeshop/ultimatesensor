@@ -2,7 +2,7 @@
 # Shared ESP32-S3 hardware, sensors, radar, PIR, and audio stack for all V2 variants.
 
 substitutions:
-  ultimatesensor_software_version: "1.3"
+  ultimatesensor_software_version: "1.4"
   log_level: "INFO"
   scd41_temperature_offset: "0.0"
   scd41_humidity_offset: "3.0"
