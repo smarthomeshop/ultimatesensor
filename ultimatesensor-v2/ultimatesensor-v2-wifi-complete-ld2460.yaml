@@ -7,6 +7,22 @@ substitutions:
   ultimatesensor_hardware_version: "V2-Complete-LD2460"
   ultimatesensor_connection_type: "WiFi"
   wifi_fast_connect: "false"
+  default_network: "WiFi Complete (local)"
+  tracking_suffix: "-ld2460"
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-manifest.json"
+  setup_product_name: "UltimateSensor"
+  setup_product_variant: "V2 WiFi Complete + LD2460 upgrade"
+  setup_support_cloud: "true"
+  setup_support_home_assistant: "true"
+  setup_support_mqtt: "false"
+  setup_support_homey: "false"
+  setup_support_ethernet: "true"
+  setup_support_firmware_selector: "true"
+  setup_default_cloud_enabled: "false"
+  setup_default_home_assistant_enabled: "true"
+  setup_default_mqtt_enabled: "false"
+  setup_firmware_options: "WiFi Basic (local)|WiFi Complete (local)|WiFi Basic + SmartHomeShop App (cloud)|WiFi Complete + SmartHomeShop App (cloud)|Ethernet Basic (local)|Ethernet Complete (local)|Ethernet Basic + SmartHomeShop App (cloud)|Ethernet Complete + SmartHomeShop App (cloud)"
+  setup_default_firmware_option: ${default_network}
 
 packages:
   base: !include base.yaml
@@ -14,6 +30,9 @@ packages:
   net: !include wifi.yaml
   voice: !include voice-assistant.yaml
   variant: !include complete.yaml
+  firmware: !include firmware-selector.yaml
+  setup_portal: github://smarthomeshop/setup-portal/packages/setup-portal.yaml@main
+  setup_portal_bridge: github://smarthomeshop/setup-portal/packages/firmware-selector-bridge.yaml@main
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460.yaml@main

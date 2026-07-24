@@ -7,6 +7,9 @@ substitutions:
   ultimatesensor_connection_type: "Ethernet"
   cloud_mac_sensor_id: ethernet_mac_address
   cloud_ip_sensor_id: ethernet_ip_address
+  default_network: "Ethernet Basic + SmartHomeShop App (cloud)"
+  tracking_suffix: "-ld2460"
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json"
 
 packages:
   base: !include base.yaml
@@ -14,6 +17,7 @@ packages:
   net: !include ethernet.yaml
   voice: !include voice-assistant.yaml
   cloud: !include cloud.yaml
+  firmware: !include firmware-selector.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460-cloud.yaml@main

@@ -6,6 +6,9 @@ substitutions:
   friendly_name: "UltimateSensor V2"
   ultimatesensor_hardware_version: "V2-Complete-LD2460"
   ultimatesensor_connection_type: "Ethernet"
+  default_network: "Ethernet Complete (local)"
+  tracking_suffix: "-ld2460"
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-manifest.json"
 
 packages:
   base: !include base.yaml
@@ -13,6 +16,7 @@ packages:
   net: !include ethernet.yaml
   voice: !include voice-assistant.yaml
   variant: !include complete.yaml
+  firmware: !include firmware-selector.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460.yaml@main

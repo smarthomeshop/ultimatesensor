@@ -6,12 +6,16 @@ substitutions:
   friendly_name: "UltimateSensor V2"
   ultimatesensor_hardware_version: "V2-Basic"
   ultimatesensor_connection_type: "Ethernet"
+  default_network: "Ethernet Basic (local)"
+  tracking_suffix: ""
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-manifest.json"
 
 packages:
   base: !include base.yaml
   tracking: !include tracking-ld2450.yaml
   net: !include ethernet.yaml
   voice: !include voice-assistant.yaml
+  firmware: !include firmware-selector.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v2/ultimatesensor-v2-ethernet-basic.yaml@main

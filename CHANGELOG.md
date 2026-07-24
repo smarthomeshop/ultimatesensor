@@ -8,6 +8,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 - Add customer-facing firmware notes here before merging a PR.
 
+- Added the branded SmartHomeShop setup portal to all UltimateSensor V2 WiFi firmware variants: connecting to the fallback hotspot now opens a SmartHomeShop setup page to pick your WiFi network, choose the firmware variant and see next steps for Home Assistant or SmartHomeShop Cloud.
+
+- Added a firmware variant selector to UltimateSensor V2, so you can switch between WiFi and Ethernet, Basic and Complete, and local or SmartHomeShop App (cloud) firmware from the device itself instead of reflashing over USB.
+
 ## [UltimateSensor V1 1.11] - 2026-07-24
 
 
