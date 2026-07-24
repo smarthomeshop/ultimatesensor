@@ -6,7 +6,19 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 1.11] - 2026-07-24
+
+
 - Reworked UltimateSensor V1 and V2 LD2450 tracking to use the native ESPHome LD2450 component plus SmartHomeShop polygon zones, entry lines, people counting, and Home Assistant zone push actions.
+
+
+## [UltimateSensor V2 1.3] - 2026-07-24
+
+
+- Reworked UltimateSensor V1 and V2 LD2450 tracking to use the native ESPHome LD2450 component plus SmartHomeShop polygon zones, entry lines, people counting, and Home Assistant zone push actions.
+
 
 ## [UltimateSensor V1 1.10] - 2026-07-09
 
