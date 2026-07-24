@@ -1,10 +1,41 @@
 # UltimateSensor for Home Assistant / ESPHome
 
-![UltimateSensor](images/ultimatesensor-inaction-shop.png)
+<p align="center">
+  <img src="images/ultimatesensor-inaction-shop.png" alt="UltimateSensor V1" width="360">
+  <img src="images/ultimatesensor-v2-2026-white.png" alt="UltimateSensor V2" width="360">
+</p>
+
+<table align="center">
+  <tr>
+    <th>UltimateSensor V1</th>
+    <th>UltimateSensor V2 · 2026</th>
+  </tr>
+  <tr>
+    <td valign="top">
+      <ul>
+        <li>ESP32 with WiFi or Ethernet with PoE support</li>
+        <li>LD2450 mmWave target tracking</li>
+        <li>PIR motion sensing and an OLED display</li>
+        <li>CO2, temperature, humidity, VOC/NOx and illuminance (lux)</li>
+        <li>Basic and Complete with optional particulate matter measurements: PM1.0, PM2.5, PM4.0 and PM10</li>
+      </ul>
+    </td>
+    <td valign="top">
+      <ul>
+        <li>ESP32-S3 with WiFi or Ethernet with PoE support</li>
+        <li>LD2412 presence plus LD2450 target tracking</li>
+        <li>Optional LD2460 upgrade replacing the LD2450</li>
+        <li>PIR, microphone and speaker for Voice Assistant</li>
+        <li>CO2, temperature, humidity, VOC/NOx and illuminance (lux)</li>
+        <li>Basic and Complete with optional particulate matter measurements: PM1.0, PM2.5, PM4.0 and PM10</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 UltimateSensor is an ESPHome-based room sensor for Home Assistant. It measures air quality, occupancy, light, temperature, humidity, VOC/NOx index values, and optionally particulate matter, with local operation over WiFi or Ethernet/PoE.
 
-Product page: https://ultimatesensor.nl/en
+Product page: [https://ultimatesensor.nl/en](https://ultimatesensor.nl/en)
 
 ## How It Works
 
@@ -21,7 +52,7 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 - LD2412 close-range mmWave presence sensing on V2
 - LD2450 mmWave occupancy and target tracking as the standard V2 tracking radar
 - Optional LD2460 target tracking upgrade firmware for V2
-- PIR motion sensing on V2
+- PIR motion sensing
 - I2S microphone, speaker media player, local wake word, and Home Assistant voice assistant on V2
 - OLED display with Home Assistant LCD display control
 - RGB back light and ESP status LED
@@ -36,7 +67,7 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 
 | Version | Chip | Connectivity | Description |
 |---------|------|--------------|-------------|
-| V1 | ESP32 | WiFi, Ethernet, and PoE | UltimateSensor hardware with Basic and Complete firmware variants |
+| V1 | ESP32 | WiFi, Ethernet, and PoE | UltimateSensor hardware with LD2450 tracking, PIR, OLED display, and Basic/Complete firmware variants |
 | V2 | ESP32-S3 | WiFi, W5500 Ethernet, and PoE | UltimateSensor V2 hardware with LD2412 + LD2450 standard, optional LD2460 upgrade firmware, PIR, microphone, speaker, and Basic/Complete variants |
 
 ## Variants
