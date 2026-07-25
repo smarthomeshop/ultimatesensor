@@ -426,6 +426,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-wifi-basic
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-wifi-complete:
     name: Build UltimateSensor WiFi Complete
@@ -439,6 +440,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-wifi-complete
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-ethernet-basic:
     name: Build UltimateSensor Ethernet Basic
@@ -452,6 +454,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-ethernet-basic
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-ethernet-complete:
     name: Build UltimateSensor Ethernet Complete
@@ -465,6 +468,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-ethernet-complete
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-v2-wifi-basic:
     name: Build UltimateSensor V2 WiFi Basic
@@ -590,6 +594,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-wifi-basic-cloud
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-wifi-complete-cloud:
     name: Build UltimateSensor WiFi Complete Cloud
@@ -603,6 +608,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-wifi-complete-cloud
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-ethernet-basic-cloud:
     name: Build UltimateSensor Ethernet Basic Cloud
@@ -616,6 +622,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-ethernet-basic-cloud
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-ethernet-complete-cloud:
     name: Build UltimateSensor Ethernet Complete Cloud
@@ -629,6 +636,7 @@ jobs:
       esphome_version: latest
       directory_name: ultimatesensor-ethernet-complete-cloud
       software_version: ${{ needs.detect-changes.outputs.v1_version }}
+      version_file: ultimatesensor-v1/base.yaml
 
   build-ultimatesensor-v2-wifi-basic-cloud:
     name: Build UltimateSensor V2 WiFi Basic Cloud
