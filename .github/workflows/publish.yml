@@ -196,7 +196,7 @@ jobs:
           set -euo pipefail
 
           IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
-          V1_VERSION_FILE="ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
+          V1_VERSION_FILE="ultimatesensor-v1/base.yaml"
           V2_VERSION_FILE="ultimatesensor-v2/base.yaml"
 
           git fetch --tags --force >/dev/null 2>&1 || true
@@ -288,14 +288,7 @@ jobs:
           set -euo pipefail
 
           version_files_v1=(
-            "ultimatesensor-v1/ultimatesensor-wifi-basic.yaml"
-            "ultimatesensor-v1/ultimatesensor-wifi-complete.yaml"
-            "ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml"
-            "ultimatesensor-v1/ultimatesensor-ethernet-complete.yaml"
-            "ultimatesensor-v1/ultimatesensor-wifi-basic-cloud.yaml"
-            "ultimatesensor-v1/ultimatesensor-wifi-complete-cloud.yaml"
-            "ultimatesensor-v1/ultimatesensor-ethernet-basic-cloud.yaml"
-            "ultimatesensor-v1/ultimatesensor-ethernet-complete-cloud.yaml"
+            "ultimatesensor-v1/base.yaml"
           )
           version_files_v2=(
             "ultimatesensor-v2/base.yaml"
