@@ -3,10 +3,6 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-<<<<<<< Updated upstream
-  ultimatesensor_software_version: "1.12"
-=======
->>>>>>> Stashed changes
   ultimatesensor_hardware_version: "V1-Basic"
   ultimatesensor_connection_type: "Ethernet"
   cloud_mac_sensor_id: ethernet_mac

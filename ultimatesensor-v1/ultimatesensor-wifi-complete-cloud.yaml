@@ -3,10 +3,6 @@
 substitutions:
   device_name: ultimatesensor
   friendly_name: "UltimateSensor"
-<<<<<<< Updated upstream
-  ultimatesensor_software_version: "1.12"
-=======
->>>>>>> Stashed changes
   ultimatesensor_hardware_version: "V1-Complete"
   ultimatesensor_connection_type: "WiFi"
   wifi_fast_connect: "false"
