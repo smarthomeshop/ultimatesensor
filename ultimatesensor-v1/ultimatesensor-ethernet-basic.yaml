@@ -8,11 +8,14 @@ substitutions:
   ultimatesensor_software_version: "1.11"
   ultimatesensor_hardware_version: "V1-Basic"
   ultimatesensor_connection_type: "Ethernet"
+  default_network: "Ethernet Basic (local)"
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic-manifest.json"
 
 packages:
   base: !include base.yaml
   ld2450_zones: !include zones.yaml
   net: !include ethernet.yaml
+  firmware: !include firmware-selector.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-ethernet-basic.yaml@main

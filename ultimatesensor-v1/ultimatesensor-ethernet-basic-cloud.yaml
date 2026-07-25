@@ -8,6 +8,8 @@ substitutions:
   ultimatesensor_connection_type: "Ethernet"
   cloud_mac_sensor_id: ethernet_mac
   cloud_ip_sensor_id: ethernet_ip
+  default_network: "Ethernet Basic + SmartHomeShop App (cloud)"
+  update_manifest_url: "https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-ethernet-basic-cloud-manifest.json"
 
 packages:
   base: !include base.yaml
@@ -16,6 +18,7 @@ packages:
   cloud_net: !include cloud-ethernet.yaml
   cloud: !include cloud.yaml
   zones: !include cloud-zones.yaml
+  firmware: !include firmware-selector.yaml
 
 dashboard_import:
   package_import_url: github://smarthomeshop/ultimatesensor/ultimatesensor-v1/ultimatesensor-ethernet-basic-cloud.yaml@main
