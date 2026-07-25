@@ -1115,8 +1115,16 @@ jobs:
 
   create-releases:
     name: Create GitHub releases
-    needs: [detect-changes]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [detect-changes, publish-gh-pages]
+    # Only tag a release once the firmware behind it is actually published.
+    # always() is required so this still runs when some build jobs are skipped
+    # (for example when only one hardware version changed).
+    if: >-
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.detect-changes.result == 'success' &&
+      needs.publish-gh-pages.result == 'success'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
