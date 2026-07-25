@@ -8,7 +8,12 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 - Add customer-facing firmware notes here before merging a PR.
 
+## [UltimateSensor V1 1.13] - 2026-07-25
+
+
+
 - Internal change only: the UltimateSensor V1 firmware version is now defined in one place instead of in every variant file, so all V1 variants always report the same version. No change in device behavior.
+
 
 ## [UltimateSensor V1 1.12] - 2026-07-25
 
