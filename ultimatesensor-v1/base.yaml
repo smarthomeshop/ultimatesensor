@@ -4,24 +4,28 @@
 substitutions:
   # Bumped by the release workflow. Defined here (not per variant) so every V1
   # firmware reports the same version, matching how V2 is set up.
-  ultimatesensor_software_version: "1.13"
+  ultimatesensor_software_version: "2.0"
 
 # Esphome start
 esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
   name_add_mac_suffix: true
+  min_version: 2025.2.0
   project:
     name: "smarthomeshop.ultimatesensor"
     version: ${ultimatesensor_software_version}
 
 esp32:
   board: esp32dev
+  flash_size: 4MB
   framework:
-    type: arduino
+    type: esp-idf
 
 # Enable logging
 logger:
+  level: INFO
+  hardware_uart: UART0
 
 # Enable Home Assistant API
 api:
@@ -50,11 +54,11 @@ i2c:
 
 light:
   # WS2812B LED at the back
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2811
+  - platform: esp32_rmt_led_strip
     pin: GPIO13
     num_leds: 1
+    rgb_order: GRB
+    chipset: ws2812
     name: "Back Light"
 
 # Status LED of ESP

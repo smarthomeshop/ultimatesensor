@@ -6,7 +6,25 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+### UltimateSensor V1
+
+- Migrated every UltimateSensor V1 firmware variant from the Arduino framework
+  to ESP-IDF and started the new 2.0 firmware line.
+- Replaced the Arduino-only back-light driver with ESPHome's ESP-IDF RMT LED
+  driver while retaining the existing Back Light entity, GPIO and LED color
+  order.
+- Firmware 2.0 requires one full installation through USB-C when upgrading
+  from 1.13 or older. After that migration, future 2.x updates work through
+  the normal OTA update entity again.
+
+### UltimateSensor V2
+
+- Added optional automatic front-LED lighting to UltimateSensor V2: a white
+  motion light, warm scheduled night light, and orange/red CO2 warning flashes.
+  All automatic lighting features default to off and retain their settings
+  after a restart.
+- Added SmartHomeShop App cloud configuration and acknowledgement support for
+  UltimateSensor V2 LED lighting settings.
 
 ## [UltimateSensor V2 1.5] - 2026-07-27
 

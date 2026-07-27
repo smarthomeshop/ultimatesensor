@@ -67,7 +67,7 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 
 | Version | Chip | Connectivity | Description |
 |---------|------|--------------|-------------|
-| V1 | ESP32 | WiFi, Ethernet, and PoE | UltimateSensor hardware with LD2450 tracking, PIR, OLED display, and Basic/Complete firmware variants |
+| V1 | ESP32 | WiFi, Ethernet, and PoE | UltimateSensor hardware with ESP-IDF firmware, LD2450 tracking, PIR, OLED display, and Basic/Complete firmware variants |
 | V2 | ESP32-S3 | WiFi, W5500 Ethernet, and PoE | UltimateSensor V2 hardware with LD2412 + LD2450 standard, optional LD2460 upgrade firmware, PIR, microphone, speaker, and Basic/Complete variants |
 
 ## Variants
@@ -108,6 +108,11 @@ We publish customer-facing WiFi and Ethernet firmware variants for V1 and V2 har
 | Uptime | Device uptime |
 
 ## Getting Started
+
+> **UltimateSensor V1 2.0 migration:** Devices running V1 firmware 1.13 or
+> older require one full USB-C installation to migrate from Arduino to
+> ESP-IDF. Remove the V1 LD2450 module before USB flashing, reinstall it after
+> flashing, and then use normal OTA updates for future 2.x releases.
 
 1. Power the UltimateSensor with USB-C or PoE where supported.
 2. Flash the desired firmware with the web flasher or ESPHome CLI.

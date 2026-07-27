@@ -73,24 +73,40 @@ jobs:
           fi
 
           if echo "$CHANGED_FILES" | grep -qx 'CHANGELOG.md'; then
-            unreleased_notes=$(mktemp)
-            awk '
-              $0 == "## [Unreleased]" { found=1; next }
-              found && /^## \[/ { exit }
-              found { print }
-            ' CHANGELOG.md \
-              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
-              > "$unreleased_notes"
+            require_product_notes() {
+              local product=$1
+              local notes
+              notes=$(mktemp)
 
-            if grep -q '[^[:space:]]' "$unreleased_notes"; then
-              echo "CHANGELOG.md updated with Unreleased notes"
-              rm -f "$unreleased_notes"
-              exit 0
+              awk -v target="### ${product}" '
+                $0 == "## [Unreleased]" { in_unreleased=1; next }
+                in_unreleased && /^## \[/ { exit }
+                in_unreleased && $0 == target { in_target=1; next }
+                in_unreleased && in_target && /^### / { exit }
+                in_unreleased && in_target { print }
+              ' CHANGELOG.md \
+                | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+                > "$notes"
+
+              if ! grep -q '[^[:space:]]' "$notes"; then
+                rm -f "$notes"
+                echo "::error file=CHANGELOG.md::Firmware changes for ${product} require notes under '### ${product}' in ## [Unreleased]."
+                exit 1
+              fi
+
+              rm -f "$notes"
+              echo "CHANGELOG.md contains Unreleased notes for ${product}"
+            }
+
+            if echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$'; then
+              require_product_notes "UltimateSensor V1"
             fi
 
-            rm -f "$unreleased_notes"
-            echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing note under ## [Unreleased]."
-            exit 1
+            if echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v2/.*\.ya?ml$'; then
+              require_product_notes "UltimateSensor V2"
+            fi
+
+            exit 0
           fi
 
           echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing CHANGELOG.md update."
@@ -295,50 +311,103 @@ jobs:
           )
 
           finalize_changelog() {
-            local unreleased_notes
+            local v1_notes
+            local v2_notes
+            local remaining_unreleased
+            local next_unreleased
             local release_blocks
             local release_date
 
-            unreleased_notes=$(mktemp)
+            v1_notes=$(mktemp)
+            v2_notes=$(mktemp)
+            remaining_unreleased=$(mktemp)
+            next_unreleased=$(mktemp)
             release_blocks=$(mktemp)
             release_date=$(TZ=Europe/Amsterdam date +%Y-%m-%d)
 
-            awk '
-              $0 == "## [Unreleased]" { found=1; next }
-              found && /^## \[/ { exit }
-              found { print }
-            ' CHANGELOG.md \
-              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
-              > "$unreleased_notes"
+            extract_product_notes() {
+              local product=$1
+              local output=$2
 
-            if ! grep -q '[^[:space:]]' "$unreleased_notes"; then
-              echo "No unreleased changelog notes to finalize"
-              rm -f "$unreleased_notes" "$release_blocks"
-              return
-            fi
+              awk -v target="### ${product}" '
+                $0 == "## [Unreleased]" { in_unreleased=1; next }
+                in_unreleased && /^## \[/ { exit }
+                in_unreleased && $0 == target { in_target=1; next }
+                in_unreleased && in_target && /^### / { exit }
+                in_unreleased && in_target { print }
+              ' CHANGELOG.md \
+                | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+                > "$output"
+            }
+
+            extract_product_notes "UltimateSensor V1" "$v1_notes"
+            extract_product_notes "UltimateSensor V2" "$v2_notes"
 
             if [[ "${{ steps.changes.outputs.v1 }}" == "true" ]]; then
+              if ! grep -q '[^[:space:]]' "$v1_notes"; then
+                echo "Missing UltimateSensor V1 Unreleased notes"
+                exit 1
+              fi
+
               {
                 printf '## [UltimateSensor V1 %s] - %s\n\n' "${{ steps.versions.outputs.v1_version }}" "$release_date"
-                cat "$unreleased_notes"
+                cat "$v1_notes"
                 printf '\n'
               } >> "$release_blocks"
             fi
 
             if [[ "${{ steps.changes.outputs.v2 }}" == "true" ]]; then
+              if ! grep -q '[^[:space:]]' "$v2_notes"; then
+                echo "Missing UltimateSensor V2 Unreleased notes"
+                exit 1
+              fi
+
               {
                 printf '## [UltimateSensor V2 %s] - %s\n\n' "${{ steps.versions.outputs.v2_version }}" "$release_date"
-                cat "$unreleased_notes"
+                cat "$v2_notes"
                 printf '\n'
               } >> "$release_blocks"
             fi
 
-            awk -v blocks_file="$release_blocks" '
+            awk \
+              -v remove_v1="${{ steps.changes.outputs.v1 }}" \
+              -v remove_v2="${{ steps.changes.outputs.v2 }}" '
+              $0 == "## [Unreleased]" { in_unreleased=1; next }
+              in_unreleased && /^## \[/ { exit }
+              in_unreleased && $0 == "### UltimateSensor V1" {
+                skip=(remove_v1 == "true")
+                if (!skip) print
+                next
+              }
+              in_unreleased && $0 == "### UltimateSensor V2" {
+                skip=(remove_v2 == "true")
+                if (!skip) print
+                next
+              }
+              in_unreleased && /^### / {
+                skip=0
+                print
+                next
+              }
+              in_unreleased && !skip { print }
+            ' CHANGELOG.md \
+              | sed '/^- Add customer-facing firmware notes here before merging a PR\.$/d' \
+              > "$remaining_unreleased"
+
+            if grep -q '[^[:space:]]' "$remaining_unreleased"; then
+              cat "$remaining_unreleased" > "$next_unreleased"
+            else
+              printf '%s\n' '- Add customer-facing firmware notes here before merging a PR.' > "$next_unreleased"
+            fi
+
+            awk -v unreleased_file="$next_unreleased" -v blocks_file="$release_blocks" '
               BEGIN { in_unreleased=0 }
               $0 == "## [Unreleased]" {
                 print
                 print ""
-                print "- Add customer-facing firmware notes here before merging a PR."
+                while ((getline line < unreleased_file) > 0) {
+                  print line
+                }
                 print ""
                 while ((getline line < blocks_file) > 0) {
                   print line
@@ -356,7 +425,7 @@ jobs:
             ' CHANGELOG.md > CHANGELOG.md.tmp
 
             mv CHANGELOG.md.tmp CHANGELOG.md
-            rm -f "$unreleased_notes" "$release_blocks"
+            rm -f "$v1_notes" "$v2_notes" "$remaining_unreleased" "$next_unreleased" "$release_blocks"
           }
 
           create_tag() {
