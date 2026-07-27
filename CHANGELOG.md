@@ -8,7 +8,12 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 - Add customer-facing firmware notes here before merging a PR.
 
+## [UltimateSensor V2 1.5] - 2026-07-27
+
+
+
 - Updated UltimateSensor V2 for the production PCB: USB-C now connects directly to the ESP32-S3 for flashing and logs, while the front RGB LEDs and status LED use their new dedicated GPIO pins.
+
 
 ## [UltimateSensor V1 1.13] - 2026-07-25
 
