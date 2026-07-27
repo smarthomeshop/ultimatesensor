@@ -58,7 +58,8 @@ psram:
   speed: 80MHz
 
 logger:
-  baud_rate: 0
+  hardware_uart: USB_SERIAL_JTAG
+  baud_rate: 115200
   level: ${log_level}
   logs:
     sensor: WARN
@@ -90,13 +91,13 @@ web_server:
       sorting_weight: 20
 
 status_led:
-  pin: GPIO19
+  pin: GPIO44
 
 light:
   - platform: esp32_rmt_led_strip
     id: rgb_front_led
     name: "Front LED"
-    pin: GPIO20
+    pin: GPIO43
     num_leds: 3
     chipset: ws2812
     rgb_order: GRB

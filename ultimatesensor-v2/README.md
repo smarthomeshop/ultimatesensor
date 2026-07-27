@@ -61,8 +61,9 @@ ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi varia
 | LD2460 TX/RX, optional upgrade | GPIO6 / GPIO5 |
 | Microphone WS/SD/BCLK | GPIO7 / GPIO15 / GPIO16 |
 | Speaker LRCLK/DOUT/BCLK | GPIO8 / GPIO17 / GPIO18 |
-| Front RGB LEDs | GPIO20, 3x WS2812/GRB |
-| ESP status LED | GPIO19 |
+| Front RGB LEDs | GPIO43, 3x WS2812/GRB |
+| ESP status LED | GPIO44 |
+| Native USB D- / D+ | GPIO19 / GPIO20 |
 | W5500 power enable | GPIO47, inverted |
 | W5500 CLK | GPIO21 |
 | W5500 MOSI | GPIO45 |
@@ -73,6 +74,7 @@ ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi varia
 
 ## Notes
 
+- Production V2 boards use the ESP32-S3 native USB Serial/JTAG interface for flashing and logs.
 - Basic variants omit `complete.yaml`.
 - Complete variants include `complete.yaml`, which adds the SPS30 at I2C address `0x69`.
 - Voice assistant support is part of every UltimateSensor V2 variant.

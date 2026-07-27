@@ -407,7 +407,7 @@ status_led: !remove
 
 output:
   - platform: gpio
-    pin: GPIO19  # same pin the removed status_led used
+    pin: GPIO44  # same pin the removed status_led used
     id: cloud_status_led_output
 
 interval:
