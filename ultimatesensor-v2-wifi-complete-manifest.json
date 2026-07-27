@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-wifi-complete/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "f3f2824ca7d2f440188e033c7be6045d"
+        "md5": "0ce51a49ccfeaf1dd6b68ced5257ea36"
       },
       "parts": [
         {
