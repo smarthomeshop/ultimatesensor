@@ -6,6 +6,11 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+### UltimateSensor V1
+
+- Tracking and other persisted settings are now written to flash within 10
+  seconds instead of the default one-minute delay, reducing the chance of
+  recently changed settings being lost during a power interruption.
 
 ### UltimateSensor V2
 

@@ -27,6 +27,11 @@ logger:
   level: INFO
   hardware_uart: UART0
 
+preferences:
+  # Persist tracking and other configuration settings promptly after a user
+  # changes them, while still batching writes to limit flash wear.
+  flash_write_interval: 10s
+
 # Enable Home Assistant API
 api:
   actions:
