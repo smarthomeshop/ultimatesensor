@@ -45,10 +45,18 @@ Any manual changes will be overwritten on the next publish.
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-cloud-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
 - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json`
+- `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json`
 
 ## How this branch is updated
 On pushes to the default branch, or when manually dispatched, the CI pipeline:
