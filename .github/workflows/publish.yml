@@ -1063,6 +1063,7 @@ jobs:
             local manifest_name=$2
             local display_name=$3
             local version=$4
+            local disable_improv_detection=${5:-false}
             local manifest_file="output/${variant_dir}/manifest.json"
 
             if [[ ! -f "$manifest_file" ]]; then
@@ -1070,13 +1071,18 @@ jobs:
               return
             fi
 
-            jq --arg dir "$variant_dir" --arg name "$display_name" --arg version "$version" '{
+            jq \
+              --arg dir "$variant_dir" \
+              --arg name "$display_name" \
+              --arg version "$version" \
+              --argjson disable_improv_detection "$disable_improv_detection" '{
               "name": $name,
               "version": $version,
               "home_assistant_domain": "esphome",
-              "new_install_skip_erase": false,
+              "new_install_prompt_erase": false,
               "builds": [.]
             } |
+            if $disable_improv_detection then .new_install_improv_wait_time = 0 else . end |
             .builds[0].ota.path = ($dir + "/" + .builds[0].ota.path) |
             .builds[0].parts[].path = ($dir + "/" + .builds[0].parts[].path)' \
               "$manifest_file" > "output/${manifest_name}"
@@ -1090,22 +1096,22 @@ jobs:
           create_manifest "ultimatesensor-wifi-complete-cloud" "ultimatesensor-wifi-complete-cloud-manifest.json" "UltimateSensor WiFi Complete Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-basic-cloud" "ultimatesensor-ethernet-basic-cloud-manifest.json" "UltimateSensor Ethernet Basic Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
           create_manifest "ultimatesensor-ethernet-complete-cloud" "ultimatesensor-ethernet-complete-cloud-manifest.json" "UltimateSensor Ethernet Complete Cloud" "${{ needs.detect-changes.outputs.v1_version }}"
-          create_manifest "ultimatesensor-v2-wifi-basic" "ultimatesensor-v2-wifi-basic-manifest.json" "UltimateSensor V2 WiFi Basic" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-complete" "ultimatesensor-v2-wifi-complete-manifest.json" "UltimateSensor V2 WiFi Complete" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-basic" "ultimatesensor-v2-ethernet-basic-manifest.json" "UltimateSensor V2 Ethernet Basic" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-complete" "ultimatesensor-v2-ethernet-complete-manifest.json" "UltimateSensor V2 Ethernet Complete" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-basic-cloud" "ultimatesensor-v2-wifi-basic-cloud-manifest.json" "UltimateSensor V2 WiFi Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-complete-cloud" "ultimatesensor-v2-wifi-complete-cloud-manifest.json" "UltimateSensor V2 WiFi Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-basic-cloud" "ultimatesensor-v2-ethernet-basic-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-complete-cloud" "ultimatesensor-v2-ethernet-complete-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-basic-ld2460" "ultimatesensor-v2-wifi-basic-ld2460-manifest.json" "UltimateSensor V2 WiFi Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-complete-ld2460" "ultimatesensor-v2-wifi-complete-ld2460-manifest.json" "UltimateSensor V2 WiFi Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460" "ultimatesensor-v2-ethernet-basic-ld2460-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460" "ultimatesensor-v2-ethernet-complete-ld2460-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-basic-ld2460-cloud" "ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-wifi-complete-ld2460-cloud" "ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460-cloud" "ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
-          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460-cloud" "ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}"
+          create_manifest "ultimatesensor-v2-wifi-basic" "ultimatesensor-v2-wifi-basic-manifest.json" "UltimateSensor V2 WiFi Basic" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-complete" "ultimatesensor-v2-wifi-complete-manifest.json" "UltimateSensor V2 WiFi Complete" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-basic" "ultimatesensor-v2-ethernet-basic-manifest.json" "UltimateSensor V2 Ethernet Basic" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-complete" "ultimatesensor-v2-ethernet-complete-manifest.json" "UltimateSensor V2 Ethernet Complete" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-basic-cloud" "ultimatesensor-v2-wifi-basic-cloud-manifest.json" "UltimateSensor V2 WiFi Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-complete-cloud" "ultimatesensor-v2-wifi-complete-cloud-manifest.json" "UltimateSensor V2 WiFi Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-basic-cloud" "ultimatesensor-v2-ethernet-basic-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-complete-cloud" "ultimatesensor-v2-ethernet-complete-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-basic-ld2460" "ultimatesensor-v2-wifi-basic-ld2460-manifest.json" "UltimateSensor V2 WiFi Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-complete-ld2460" "ultimatesensor-v2-wifi-complete-ld2460-manifest.json" "UltimateSensor V2 WiFi Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460" "ultimatesensor-v2-ethernet-basic-ld2460-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460" "ultimatesensor-v2-ethernet-complete-ld2460-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-basic-ld2460-cloud" "ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-wifi-complete-ld2460-cloud" "ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 WiFi Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-basic-ld2460-cloud" "ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Basic LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
+          create_manifest "ultimatesensor-v2-ethernet-complete-ld2460-cloud" "ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json" "UltimateSensor V2 Ethernet Complete LD2460 Cloud" "${{ needs.detect-changes.outputs.v2_version }}" true
 
       - name: Create README for gh-pages
         shell: bash

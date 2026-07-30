@@ -47,6 +47,11 @@ on:
         required: false
         type: boolean
         default: false
+      disable_improv_detection:
+        description: Skip Improv Serial detection before installation (required for ESP32-S3 native USB).
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   prepare:
@@ -168,7 +173,15 @@ jobs:
           jq -s \
             --arg name "${{ inputs.name }}" \
             --arg version "$MANIFEST_VERSION" \
-            '{"name": $name, "version": $version, "home_assistant_domain": "esphome", "new_install_skip_erase": false, "builds":.}' \
+            --argjson disable_improv_detection "${{ inputs.disable_improv_detection }}" \
+            '{
+              "name": $name,
+              "version": $version,
+              "home_assistant_domain": "esphome",
+              "new_install_prompt_erase": false,
+              "builds":.
+            } |
+            if $disable_improv_detection then .new_install_improv_wait_time = 0 else . end' \
             "$MANIFEST_FILE" \
             > output/${{ inputs.manifest_filename }}
           jq --arg dir "${{ inputs.directory_name }}" '
