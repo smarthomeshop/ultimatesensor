@@ -6,12 +6,16 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V2
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V2 1.7] - 2026-07-30
+
 
 - Calibration, tracking, lighting and other persisted settings are now written
   to flash within 10 seconds instead of the default one-minute delay, reducing
   the chance of recently changed settings being lost during a power
   interruption.
+
 
 ## [UltimateSensor V2 1.6] - 2026-07-30
 
