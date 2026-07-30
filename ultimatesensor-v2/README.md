@@ -14,27 +14,37 @@ Leave the LD2412 installed. LD2412 and PIR remain reliable presence fallbacks an
 | `wifi.yaml` | WiFi firmware network stack, captive portal, Improv, WiFi diagnostics, Ethernet power off |
 | `ethernet.yaml` | W5500 Ethernet firmware network stack and Ethernet diagnostics |
 | `voice-assistant.yaml` | Local wake word and Home Assistant voice assistant package |
+| `cloud-voice.yaml` | Local wake word and SmartHomeShop Cloud Voice package for cloud firmware |
 | `complete.yaml` | SPS30 particulate matter sensor and PM idle controls |
+| `led-lighting.yaml` | Persistent local controls for motion light, night light, and CO2 warning flashes |
 
 ## Firmware Variants
 
 Standard variants are for the product as shipped with LD2412 + LD2450.
 
-| File | Network | SPS30 | Tracking radar | Voice |
+| File | Network | SPS30 | Tracking radar | Voice service |
 | --- | --- | --- | --- | --- |
-| `ultimatesensor-v2-wifi-basic.yaml` | WiFi | No | LD2450 | Yes |
-| `ultimatesensor-v2-wifi-complete.yaml` | WiFi | Yes | LD2450 | Yes |
-| `ultimatesensor-v2-ethernet-basic.yaml` | Ethernet W5500 | No | LD2450 | Yes |
-| `ultimatesensor-v2-ethernet-complete.yaml` | Ethernet W5500 | Yes | LD2450 | Yes |
+| `ultimatesensor-v2-wifi-basic.yaml` | WiFi | No | LD2450 | Home Assistant |
+| `ultimatesensor-v2-wifi-complete.yaml` | WiFi | Yes | LD2450 | Home Assistant |
+| `ultimatesensor-v2-ethernet-basic.yaml` | Ethernet W5500 | No | LD2450 | Home Assistant |
+| `ultimatesensor-v2-ethernet-complete.yaml` | Ethernet W5500 | Yes | LD2450 | Home Assistant |
+| `ultimatesensor-v2-wifi-basic-cloud.yaml` | WiFi | No | LD2450 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-wifi-complete-cloud.yaml` | WiFi | Yes | LD2450 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-ethernet-basic-cloud.yaml` | Ethernet W5500 | No | LD2450 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-ethernet-complete-cloud.yaml` | Ethernet W5500 | Yes | LD2450 | SmartHomeShop Cloud |
 
 LD2460 upgrade variants are only for devices where the LD2450 module has been removed/replaced by the optional LD2460 module.
 
-| File | Network | SPS30 | Tracking radar | Voice |
+| File | Network | SPS30 | Tracking radar | Voice service |
 | --- | --- | --- | --- | --- |
-| `ultimatesensor-v2-wifi-basic-ld2460.yaml` | WiFi | No | LD2460 | Yes |
-| `ultimatesensor-v2-wifi-complete-ld2460.yaml` | WiFi | Yes | LD2460 | Yes |
-| `ultimatesensor-v2-ethernet-basic-ld2460.yaml` | Ethernet W5500 | No | LD2460 | Yes |
-| `ultimatesensor-v2-ethernet-complete-ld2460.yaml` | Ethernet W5500 | Yes | LD2460 | Yes |
+| `ultimatesensor-v2-wifi-basic-ld2460.yaml` | WiFi | No | LD2460 | Home Assistant |
+| `ultimatesensor-v2-wifi-complete-ld2460.yaml` | WiFi | Yes | LD2460 | Home Assistant |
+| `ultimatesensor-v2-ethernet-basic-ld2460.yaml` | Ethernet W5500 | No | LD2460 | Home Assistant |
+| `ultimatesensor-v2-ethernet-complete-ld2460.yaml` | Ethernet W5500 | Yes | LD2460 | Home Assistant |
+| `ultimatesensor-v2-wifi-basic-ld2460-cloud.yaml` | WiFi | No | LD2460 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-wifi-complete-ld2460-cloud.yaml` | WiFi | Yes | LD2460 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-ethernet-basic-ld2460-cloud.yaml` | Ethernet W5500 | No | LD2460 | SmartHomeShop Cloud |
+| `ultimatesensor-v2-ethernet-complete-ld2460-cloud.yaml` | Ethernet W5500 | Yes | LD2460 | SmartHomeShop Cloud |
 
 ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi variants keep the W5500 powered off. The Ethernet variants power the W5500 and expose Ethernet network info sensors.
 
@@ -78,4 +88,16 @@ ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi varia
 - Basic variants omit `complete.yaml`.
 - Complete variants include `complete.yaml`, which adds the SPS30 at I2C address `0x69`.
 - Voice assistant support is part of every UltimateSensor V2 variant.
-- Local wake word defaults to `okay_nabu` and can be toggled with `Enable Voice Assistant`.
+- The local wake phrase is `Okay Nabu` and can be toggled with
+  `Enable Voice Assistant`.
+- Standard firmware sends voice requests to Home Assistant. Cloud firmware uses
+  SmartHomeShop Cloud Voice and does not require Home Assistant. Claim the
+  device in the SmartHomeShop App and enable Cloud Voice before first use.
+- WiFi variants include Improv, a fallback hotspot, and the branded
+  SmartHomeShop captive setup portal. Ethernet variants use wired networking
+  and therefore do not create a WiFi setup hotspot.
+- Automatic LED lighting defaults to off. Local firmware exposes persistent
+  Home Assistant controls; cloud firmware receives the same settings from the
+  SmartHomeShop App.
+- Voice Assistant and boot LED animations take priority over automatic motion,
+  night-light, and CO2 indications.

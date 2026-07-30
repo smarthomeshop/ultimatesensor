@@ -5,6 +5,8 @@
 substitutions:
   ld2460_tx_pin: GPIO6
   ld2460_rx_pin: GPIO5
+  # LD2460 reports target presence but does not classify moving/still targets.
+  tracking_motion_sensor_id: tracking_presence
 
 packages:
   ld2460:

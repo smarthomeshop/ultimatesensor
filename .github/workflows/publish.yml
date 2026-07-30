@@ -20,6 +20,7 @@ on:
     paths:
       - "CHANGELOG.md"
       - ".github/workflows/**"
+      - "components/cloud_voice/**"
       - "ultimatesensor-v1/**"
       - "ultimatesensor-v2/**"
 
@@ -67,8 +68,8 @@ jobs:
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          if ! echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v[12]/.*\.ya?ml$'; then
-            echo "No firmware YAML changes detected; changelog update not required"
+          if ! echo "$CHANGED_FILES" | grep -Eq '^(ultimatesensor-v[12]/.*\.ya?ml|components/cloud_voice/.*)$'; then
+            echo "No firmware changes detected; changelog update not required"
             exit 0
           fi
 
@@ -102,14 +103,14 @@ jobs:
               require_product_notes "UltimateSensor V1"
             fi
 
-            if echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v2/.*\.ya?ml$'; then
+            if echo "$CHANGED_FILES" | grep -Eq '^(ultimatesensor-v2/.*\.ya?ml|components/cloud_voice/.*)$'; then
               require_product_notes "UltimateSensor V2"
             fi
 
             exit 0
           fi
 
-          echo "::error file=CHANGELOG.md::Firmware YAML changes require a customer-facing CHANGELOG.md update."
+          echo "::error file=CHANGELOG.md::Firmware changes require a customer-facing CHANGELOG.md update."
           exit 1
 
   detect-changes:
@@ -184,7 +185,7 @@ jobs:
           echo "$CHANGED_FILES"
 
           V1_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v1/.*\.ya?ml$' && echo "true" || echo "false")
-          V2_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^ultimatesensor-v2/.*\.ya?ml$' && echo "true" || echo "false")
+          V2_CHANGED=$(echo "$CHANGED_FILES" | grep -Eq '^(ultimatesensor-v2/.*\.ya?ml|components/cloud_voice/.*)$' && echo "true" || echo "false")
           WORKFLOW_CHANGED=$(echo "$CHANGED_FILES" | grep -q '^.github/workflows/' && echo "true" || echo "false")
 
           if [[ "$WORKFLOW_CHANGED" == "true" ]]; then
@@ -1157,10 +1158,18 @@ jobs:
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-cloud-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
           - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json`
+          - `https://smarthomeshop.github.io/ultimatesensor/ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json`
 
           ## How this branch is updated
           On pushes to the default branch, or when manually dispatched, the CI pipeline:

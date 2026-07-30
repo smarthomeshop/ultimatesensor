@@ -15,6 +15,7 @@ packages:
   tracking: !include tracking-ld2450.yaml
   net: !include ethernet.yaml
   voice: !include voice-assistant.yaml
+  lighting: !include led-lighting.yaml
   firmware: !include firmware-selector.yaml
 
 dashboard_import:

@@ -4,6 +4,7 @@
 substitutions:
   ld2450_uart_tx_pin: GPIO11
   ld2450_uart_rx_pin: GPIO12
+  tracking_motion_sensor_id: tracking_moving_target
 
 packages:
   ld2450:

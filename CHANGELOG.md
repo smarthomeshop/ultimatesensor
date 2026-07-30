@@ -9,6 +9,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ### UltimateSensor V2
 
+- Added SmartHomeShop Cloud Voice to the V2 cloud firmware. Customers can now
+  ask UltimateSensor spoken questions and hear answers without requiring Home
+  Assistant.
+- Added optional follow-up questions, adjustable speaker volume, and a speaker
+  test from the SmartHomeShop App.
+- Improved voice status lighting and spoken feedback when cloud voice is not
+  ready.
 - Added optional automatic front-LED lighting to UltimateSensor V2: a white
   motion light, warm scheduled night light, and orange/red CO2 warning flashes.
   All automatic lighting features default to off and retain their settings

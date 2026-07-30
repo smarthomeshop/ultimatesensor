@@ -6,6 +6,7 @@ substitutions:
   micro_wake_word_gain_factor: "12"
   wake_word_probability_cutoff: "0.80"
   wake_word_sliding_window_size: "3"
+  wake_word_restore_mode: RESTORE_DEFAULT_ON
   voice_assist_idle_phase_id: "1"
   voice_assist_listening_phase_id: "2"
   voice_assist_thinking_phase_id: "3"
@@ -127,7 +128,7 @@ voice_assistant:
           switch.is_on: use_wake_word
         then:
           - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-          - delay: 300ms
+          - delay: 750ms
           - script.execute: start_wake_word
         else:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
@@ -205,6 +206,11 @@ script:
               - not:
                   voice_assistant.is_running:
           then:
+            # A clean stop/start resets the model's streaming and cooldown
+            # state. Calling start while ESPHome still reports it running can
+            # leave detection alive but unable to recognize another phrase.
+            - micro_wake_word.stop:
+            - delay: 250ms
             - micro_wake_word.start:
       - script.execute: reset_voice_led
 
@@ -231,7 +237,7 @@ switch:
     name: "Use Wake Word"
     icon: mdi:assistant
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: ${wake_word_restore_mode}
     entity_category: config
     turn_on_action:
       - lambda: |-

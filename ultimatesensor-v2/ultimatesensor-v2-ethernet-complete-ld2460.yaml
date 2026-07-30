@@ -15,6 +15,7 @@ packages:
   tracking: !include tracking-ld2460.yaml
   net: !include ethernet.yaml
   voice: !include voice-assistant.yaml
+  lighting: !include led-lighting.yaml
   variant: !include complete.yaml
   firmware: !include firmware-selector.yaml
 

@@ -53,7 +53,8 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
 - LD2450 mmWave occupancy and target tracking as the standard V2 tracking radar
 - Optional LD2460 target tracking upgrade firmware for V2
 - PIR motion sensing
-- I2S microphone, speaker media player, local wake word, and Home Assistant voice assistant on V2
+- I2S microphone, speaker media player, and local wake word on V2, with either
+  Home Assistant Voice Assistant or SmartHomeShop Cloud Voice firmware
 - OLED display with Home Assistant LCD display control
 - RGB back light and ESP status LED
 - WiFi firmware with captive portal fallback
@@ -101,7 +102,7 @@ We publish customer-facing WiFi and Ethernet firmware variants for V1 and V2 har
 | LD2412 | Close-range mmWave presence, moving/still target, and engineering controls on V2 |
 | Target Position | LD2450 target X/Y position, speed, angle, distance, and resolution by default; LD2460 target X/Y, distance, and angle in upgrade firmware |
 | Microphone | I2S microphone RMS/peak sound level diagnostics on V2 |
-| Voice Assistant | Local wake-word detection and Home Assistant voice assistant on V2 |
+| Voice Assistant | Local wake-word detection with Home Assistant or SmartHomeShop Cloud Voice on V2 |
 | Speaker | I2S speaker media player on V2 |
 | PM1.0 / PM2.5 / PM4.0 / PM10 | Particulate matter measurements in the Complete variant |
 | WiFi Signal | WiFi signal strength in WiFi variants |
@@ -149,6 +150,7 @@ ultimatesensor/
 │   ├── wifi.yaml                       # Shared WiFi connectivity package
 │   ├── ethernet.yaml                   # Shared W5500 Ethernet connectivity package
 │   ├── voice-assistant.yaml            # Local wake word and Home Assistant voice assistant package
+│   ├── cloud-voice.yaml                # Local wake word and SmartHomeShop Cloud Voice package
 │   ├── complete.yaml                   # SPS30 particulate matter package
 │   ├── ultimatesensor-v2-wifi-basic.yaml
 │   ├── ultimatesensor-v2-wifi-complete.yaml
@@ -176,6 +178,14 @@ Pre-built firmware manifests are published on the `gh-pages` branch.
 - V2 WiFi Complete LD2460: `ultimatesensor-v2-wifi-complete-ld2460-manifest.json`
 - V2 Ethernet Basic LD2460: `ultimatesensor-v2-ethernet-basic-ld2460-manifest.json`
 - V2 Ethernet Complete LD2460: `ultimatesensor-v2-ethernet-complete-ld2460-manifest.json`
+- V2 WiFi Basic Cloud: `ultimatesensor-v2-wifi-basic-cloud-manifest.json`
+- V2 WiFi Complete Cloud: `ultimatesensor-v2-wifi-complete-cloud-manifest.json`
+- V2 Ethernet Basic Cloud: `ultimatesensor-v2-ethernet-basic-cloud-manifest.json`
+- V2 Ethernet Complete Cloud: `ultimatesensor-v2-ethernet-complete-cloud-manifest.json`
+- V2 WiFi Basic LD2460 Cloud: `ultimatesensor-v2-wifi-basic-ld2460-cloud-manifest.json`
+- V2 WiFi Complete LD2460 Cloud: `ultimatesensor-v2-wifi-complete-ld2460-cloud-manifest.json`
+- V2 Ethernet Basic LD2460 Cloud: `ultimatesensor-v2-ethernet-basic-ld2460-cloud-manifest.json`
+- V2 Ethernet Complete LD2460 Cloud: `ultimatesensor-v2-ethernet-complete-ld2460-cloud-manifest.json`
 
 ## Contributing
 

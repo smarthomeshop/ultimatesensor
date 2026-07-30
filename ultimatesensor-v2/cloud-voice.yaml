@@ -1,0 +1,179 @@
+# UltimateSensor V2 SmartHomeShop Cloud Voice package.
+# The device records after the local wake word and sends the request directly
+# to the configured SmartHomeShop API. Home Assistant is not required.
+
+substitutions:
+  wake_word: okay_nabu
+  cloud_voice_component_source: ../components
+  micro_wake_word_gain_factor: "12"
+  wake_word_probability_cutoff: "0.80"
+  wake_word_sliding_window_size: "3"
+  wake_word_restore_mode: RESTORE_DEFAULT_ON
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+
+external_components:
+  - source: ${cloud_voice_component_source}
+    components:
+      - cloud_voice
+
+esphome:
+  on_boot:
+    - priority: -20
+      then:
+        - delay: 12s
+        - lambda: |-
+            id(cloud_voice_client).set_user_enabled(id(use_wake_word).state);
+
+micro_wake_word:
+  id: micro_wake_word_01
+  microphone:
+    microphone: microphone_01
+    channels: 0
+    gain_factor: ${micro_wake_word_gain_factor}
+  models:
+    - model: ${wake_word}
+      probability_cutoff: ${wake_word_probability_cutoff}
+      sliding_window_size: ${wake_word_sliding_window_size}
+  on_wake_word_detected:
+    - logger.log: "Cloud Voice wake word detected"
+    - micro_wake_word.stop:
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 70%
+        blue: 100%
+        brightness: 80%
+        effect: "Wake Sweep"
+    - delay: 250ms
+    - lambda: |-
+        id(cloud_voice_client).start();
+
+cloud_voice:
+  id: cloud_voice_client
+  api_url: ${cloud_api_url}
+  microphone:
+    microphone: microphone_01
+    channels: 0
+    gain_factor: 1
+  media_player: media_player_01
+  micro_wake_word: micro_wake_word_01
+  wake_word_switch: use_wake_word
+  max_recording_seconds: 8
+  min_recording_seconds: 2.5
+  silence_seconds: 0.9
+  speech_rms: 50
+  silence_rms: 30
+  on_listening:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 30%
+        blue: 100%
+        brightness: 65%
+        effect: "Slow Pulse"
+  on_processing:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_thinking_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 50%
+        green: 0%
+        blue: 100%
+        brightness: 70%
+        effect: "Fast Pulse"
+  on_replying:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 0%
+        green: 90%
+        blue: 0%
+        brightness: 75%
+        effect: none
+  on_error:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_error_phase_id};
+    - light.turn_on:
+        id: rgb_front_led
+        red: 100%
+        green: 0%
+        blue: 0%
+        brightness: 100%
+        effect: none
+    - media_player.volume_set:
+        id: media_player_01
+        volume: !lambda "return id(cloud_speaker_volume) / 100.0f;"
+    - media_player.speaker.play_on_device_media_file:
+        id: media_player_01
+        media_file: voice_not_configured_file
+        announcement: true
+  on_idle:
+    - if:
+        condition:
+          lambda: |-
+            return id(use_wake_word).state
+              && id(cloud_voice_client).state_name() != std::string("muted");
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+        else:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
+    - if:
+        condition:
+          lambda: return !id(boot_animation_active);
+        then:
+          - light.turn_off: rgb_front_led
+
+switch:
+  - platform: template
+    id: use_wake_word
+    name: "Cloud Voice"
+    icon: mdi:assistant
+    optimistic: true
+    restore_mode: ${wake_word_restore_mode}
+    entity_category: config
+    turn_on_action:
+      - lambda: |-
+          id(cloud_voice_client).set_user_enabled(true);
+    turn_off_action:
+      - lambda: |-
+          id(cloud_voice_client).set_user_enabled(false);
+
+button:
+  - platform: template
+    id: cloud_voice_start_button
+    name: "Cloud Voice Start"
+    icon: mdi:microphone
+    entity_category: diagnostic
+    on_press:
+      - lambda: |-
+          id(cloud_voice_client).start();
+
+globals:
+  - id: voice_assistant_phase
+    type: int
+    restore_value: no
+    initial_value: ${voice_assist_not_ready_phase_id}
+
+text_sensor:
+  - platform: template
+    id: voice_assistant_phase_text
+    name: "Voice Assistant Phase"
+    icon: mdi:assistant
+    entity_category: diagnostic
+    update_interval: 1s
+    lambda: |-
+      switch (id(voice_assistant_phase)) {
+        case ${voice_assist_idle_phase_id}: return {"idle"};
+        case ${voice_assist_listening_phase_id}: return {"listening"};
+        case ${voice_assist_thinking_phase_id}: return {"thinking"};
+        case ${voice_assist_replying_phase_id}: return {"replying"};
+        case ${voice_assist_not_ready_phase_id}: return {"not_ready"};
+        case ${voice_assist_error_phase_id}: return {"error"};
+        case ${voice_assist_muted_phase_id}: return {"muted"};
+        default: return {"unknown"};
+      }

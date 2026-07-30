@@ -14,6 +14,7 @@ substitutions:
   voice_not_configured_volume: "50%"
   voice_not_configured_duration: "5s"
   voice_not_configured_file: "audio/voice-not-configured.wav"
+  http_request_verify_ssl: "false"
 
 esphome:
   name: ${device_name}
@@ -139,23 +140,26 @@ light:
           move_interval: 220ms
           scan_width: 2
       - addressable_lambda:
-          name: "Boot Sweep"
-          update_interval: 130ms
+          name: "Boot Breathe"
+          update_interval: 40ms
           lambda: |-
-            static uint8_t step = 0;
+            static uint16_t step = 0;
             if (initial_run) {
               step = 0;
             }
 
+            // One smooth five-second breathing cycle across all three LEDs.
+            const float phase = (step % 125) / 125.0f;
+            const float wave =
+              0.5f - 0.5f * cosf(phase * 2.0f * 3.14159265f);
+            const float brightness = 0.4f + 0.3f * wave;
+            const uint8_t level = static_cast<uint8_t>(brightness * 255.0f);
+
             for (int i = 0; i < it.size(); i++) {
-              it[i] = Color(0, 0, 0);
+              it[i] = Color(level, level, level);
             }
 
-            const int head = step % it.size();
-            const int tail = (head + it.size() - 1) % it.size();
-            it[tail] = Color(0, 30, 120);
-            it[head] = Color(0, 180, 255);
-            step = (step + 1) % it.size();
+            step = (step + 1) % 125;
 
 i2c:
   - id: bus_a
@@ -253,8 +257,8 @@ script:
                 volume: ${boot_sound_volume}
             - light.turn_on:
                 id: rgb_front_led
-                brightness: 80%
-                effect: "Boot Sweep"
+                brightness: 100%
+                effect: "Boot Breathe"
             - media_player.speaker.play_on_device_media_file:
                 id: media_player_01
                 media_file: boot_sound_file
@@ -409,6 +413,7 @@ binary_sensor:
         sorting_weight: 2
       device_class: occupancy
     has_moving_target:
+      id: ld2412_moving_target
       name: "LD2412 Moving Target"
       web_server:
         sorting_group_id: sorting_group_presence

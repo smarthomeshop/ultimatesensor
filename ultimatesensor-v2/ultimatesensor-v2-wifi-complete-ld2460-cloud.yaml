@@ -29,7 +29,7 @@ packages:
   base: !include base.yaml
   tracking: !include tracking-ld2460.yaml
   net: !include wifi.yaml
-  voice: !include voice-assistant.yaml
+  voice: !include cloud-voice.yaml
   variant: !include complete.yaml
   cloud: !include cloud.yaml
   cloud_pm: !include cloud-pm.yaml

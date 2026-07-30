@@ -26,7 +26,7 @@ ota:
 
 http_request:
   useragent: ultimatesensor-esphome
-  verify_ssl: false
+  verify_ssl: ${http_request_verify_ssl}
   timeout: 10s
 
 update:

@@ -15,7 +15,7 @@ packages:
   base: !include base.yaml
   tracking: !include tracking-ld2460.yaml
   net: !include ethernet.yaml
-  voice: !include voice-assistant.yaml
+  voice: !include cloud-voice.yaml
   cloud: !include cloud.yaml
   firmware: !include firmware-selector.yaml
 
