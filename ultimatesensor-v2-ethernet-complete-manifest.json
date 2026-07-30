@@ -2,7 +2,6 @@
   "name": "UltimateSensor V2 Ethernet Complete",
   "version": "1.7",
   "home_assistant_domain": "esphome",
-  "new_install_skip_erase": false,
   "builds": [
     {
       "chipFamily": "ESP32-S3",
@@ -17,5 +16,7 @@
         }
       ]
     }
-  ]
+  ],
+  "new_install_prompt_erase": false,
+  "new_install_improv_wait_time": 0
 }
