@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor Ethernet Basic",
-  "version": "2.0",
+  "version": "2.1",
   "home_assistant_domain": "esphome",
   "new_install_skip_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32",
       "ota": {
         "path": "ultimatesensor-ethernet-basic/ultimatesensor-esp32.ota.bin",
-        "md5": "d40dfaa9e96593d2ab8068562055c0b4"
+        "md5": "e3854f25e7a111ee0c9d73a0f8d6564e"
       },
       "parts": [
         {
