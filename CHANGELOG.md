@@ -6,8 +6,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
 
-### UltimateSensor V2
+## [UltimateSensor V2 1.6] - 2026-07-30
+
 
 - Added SmartHomeShop Cloud Voice to the V2 cloud firmware. Customers can now
   ask UltimateSensor spoken questions and hear answers without requiring Home
@@ -22,6 +24,7 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   after a restart.
 - Added SmartHomeShop App cloud configuration and acknowledgement support for
   UltimateSensor V2 LED lighting settings.
+
 
 
 
