@@ -6,11 +6,6 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V1
-
-- Tracking and other persisted settings are now written to flash within 10
-  seconds instead of the default one-minute delay, reducing the chance of
-  recently changed settings being lost during a power interruption.
 
 ### UltimateSensor V2
 
@@ -20,6 +15,15 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   after a restart.
 - Added SmartHomeShop App cloud configuration and acknowledgement support for
   UltimateSensor V2 LED lighting settings.
+
+
+
+## [UltimateSensor V1 2.1] - 2026-07-30
+
+
+- Tracking and other persisted settings are now written to flash within 10
+  seconds instead of the default one-minute delay, reducing the chance of
+  recently changed settings being lost during a power interruption.
 
 
 ## [UltimateSensor V1 2.0] - 2026-07-27
