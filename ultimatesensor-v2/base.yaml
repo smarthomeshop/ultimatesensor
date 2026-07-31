@@ -10,10 +10,12 @@ substitutions:
   boot_sound_enabled: "true"
   boot_sound_volume: "50%"
   boot_sound_duration: "10s"
-  boot_sound_file: "audio/boot1.mp3"
+  # Downloaded while compiling and then embedded in the firmware, so adopted
+  # dashboard configs do not need a local audio directory.
+  boot_sound_file: "https://raw.githubusercontent.com/smarthomeshop/ultimatesensor/main/ultimatesensor-v2/audio/boot1.mp3"
   voice_not_configured_volume: "50%"
   voice_not_configured_duration: "5s"
-  voice_not_configured_file: "audio/voice-not-configured.wav"
+  voice_not_configured_file: "https://raw.githubusercontent.com/smarthomeshop/ultimatesensor/main/ultimatesensor-v2/audio/voice-not-configured.wav"
   http_request_verify_ssl: "false"
 
 esphome:

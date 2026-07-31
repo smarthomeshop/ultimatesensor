@@ -6,7 +6,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+### UltimateSensor V2
+
+- Fixed adopted ESPHome Dashboard configurations failing to compile when the
+  boot sound or voice-not-configured audio file was not present next to the
+  customer's YAML. Both files are now downloaded from the product repository
+  while compiling and remain embedded in the firmware for fully local
+  playback.
 
 ## [UltimateSensor V2 1.7] - 2026-07-30
 
