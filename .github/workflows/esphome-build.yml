@@ -48,7 +48,7 @@ on:
         type: boolean
         default: false
       disable_improv_detection:
-        description: Skip Improv Serial detection before installation (required for ESP32-S3 native USB).
+        description: Skip post-install Improv Serial detection for firmware without Wi-Fi provisioning.
         required: false
         type: boolean
         default: false
