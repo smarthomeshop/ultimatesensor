@@ -6,6 +6,8 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+### UltimateSensor V1
+
 - Standardized UltimateSensor V1 LD2450 tracking on the same shared package
   used by UltimateSensor Mini V1, Mini V2 and UltimateSensor V2.
 - Fixed target coordinates, speed, angle, distance and resolution retaining
