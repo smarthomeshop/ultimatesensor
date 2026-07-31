@@ -166,6 +166,14 @@ binary_sensor:
       - delayed_off:
           seconds: 1
 
+  # Stable product occupancy entity; LD2450 itself is provided by the shared
+  # tracking package included by every UltimateSensor V1 firmware variant.
+  - platform: template
+    id: occupancy
+    name: "Occupancy"
+    device_class: occupancy
+    lambda: return id(tracking_presence).state;
+
 
 
 #Restart and calibration buttons

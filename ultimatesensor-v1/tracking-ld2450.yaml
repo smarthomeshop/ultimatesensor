@@ -1,0 +1,17 @@
+# Standard UltimateSensor V1 LD2450 tracking and Room Designer package.
+# Factory hardware ships with LD2450 on GPIO15/GPIO2.
+
+substitutions:
+  ld2450_uart_tx_pin: GPIO15
+  ld2450_uart_rx_pin: GPIO02
+  # The V1 PCB needs the ESP32 input pull-up on the LD2450 RX connection.
+  ld2450_uart_rx_pullup: "true"
+
+packages:
+  ld2450:
+    url: https://github.com/smarthomeshop/ld2450
+    ref: main
+    files:
+      - packages/ld2450-base.yaml
+      - packages/ld2450-polygon-zones.yaml
+    refresh: 1d
