@@ -11,7 +11,8 @@ packages:
   ld2450:
     url: https://github.com/smarthomeshop/ld2450
     ref: main
-    # Pick up shared tracking and stale-target fixes without product duplication.
+# Pick up shared tracking and stale-target fixes without product duplication.
+# Ceiling mounting metadata is intentionally reserved for CeilSense.
     files:
       - packages/ld2450-base.yaml
       - packages/ld2450-polygon-zones.yaml
