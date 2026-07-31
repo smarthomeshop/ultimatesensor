@@ -6,7 +6,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V1
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 2.2] - 2026-07-31
+
 
 - Standardized UltimateSensor V1 LD2450 tracking on the same shared package
   used by UltimateSensor Mini V1, Mini V2 and UltimateSensor V2.
@@ -15,6 +18,7 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 - Rebuilt every UltimateSensor V1 firmware variant with the shared LD2450
   tracking and stale-target fixes while retaining its normal room mounting
   profile.
+
 
 ## [UltimateSensor V2 1.9] - 2026-07-31
 
