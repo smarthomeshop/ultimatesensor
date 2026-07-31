@@ -6,10 +6,14 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V2
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V2 1.9] - 2026-07-31
+
 
 - Wi-Fi can now be configured directly in the browser immediately after a USB
   installation on UltimateSensor V2.
+
 
 ## [UltimateSensor V2 1.8] - 2026-07-31
 
