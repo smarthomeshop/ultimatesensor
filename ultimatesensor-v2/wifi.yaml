@@ -21,6 +21,9 @@ captive_portal:
 esp32_improv:
   authorizer: none
 
+# Used by the browser flasher to configure Wi-Fi directly over USB.
+improv_serial:
+
 switch:
   - platform: gpio
     id: eth_power
