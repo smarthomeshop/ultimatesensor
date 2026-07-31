@@ -12,6 +12,8 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   used by UltimateSensor Mini V1, Mini V2 and UltimateSensor V2.
 - Fixed target coordinates, speed, angle, distance and resolution retaining
   stale values after an LD2450 target disappeared.
+- Rebuilt every UltimateSensor V1 firmware variant with the shared LD2450
+  tracking and stale-target fixes.
 
 ## [UltimateSensor V2 1.9] - 2026-07-31
 
