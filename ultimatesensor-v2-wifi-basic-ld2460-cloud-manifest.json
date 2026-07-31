@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-wifi-basic-ld2460-cloud/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "2e8c3ab7b1fe1b60f77ea0d071620c25"
+        "md5": "d78cf0e268d779eec957fe71dc61e3fe"
       },
       "parts": [
         {
