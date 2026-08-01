@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor WiFi Complete",
-  "version": "2.2",
+  "version": "2.3",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32",
       "ota": {
         "path": "ultimatesensor-wifi-complete/ultimatesensor-esp32.ota.bin",
-        "md5": "6fad83ee8b5b3832ea165b9c9f08abe6"
+        "md5": "c9fda68261300ce71192710e10247475"
       },
       "parts": [
         {
