@@ -12,6 +12,8 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   UltimateSensor V1 LD2450 firmware.
 - UltimateSensor V1 continues to use its factory LD2450 through the same shared
   tracking, polygon-zone and stale-target implementation as the other products.
+- Static mounting metadata is published once during startup without periodic
+  polling.
 
 ### UltimateSensor V2
 
@@ -19,6 +21,8 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   every UltimateSensor V2 LD2450/LD2460 firmware variant.
 - Rebuilt UltimateSensor V2 against the current shared LD2450 and LD2460
   packages so every tracking variant exposes the same metadata contract.
+- Static mounting metadata is published once during startup without periodic
+  polling.
 
 ## [UltimateSensor V1 2.2] - 2026-07-31
 
