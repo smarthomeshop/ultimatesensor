@@ -1,4 +1,4 @@
-# Standard UltimateSensor V2 LD2450 tracking and Room Designer package.
+# Standard UltimateSensor V2 LD2450 tracking and wall-mounted Room Designer package.
 # Factory hardware ships with LD2450 on GPIO11/GPIO12.
 
 substitutions:

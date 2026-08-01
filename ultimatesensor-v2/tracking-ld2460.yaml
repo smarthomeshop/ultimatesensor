@@ -1,4 +1,4 @@
-# Optional UltimateSensor V2 LD2460 tracking upgrade package.
+# Optional UltimateSensor V2 LD2460 tracking and wall-mounted Room Designer package.
 # Use only after physically replacing/removing the LD2450 module and installing the LD2460 upgrade.
 # Keep the LD2412 installed; PIR and LD2412 remain reliable presence fallbacks.
 
