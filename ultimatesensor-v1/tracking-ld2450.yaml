@@ -11,9 +11,9 @@ packages:
   ld2450:
     url: https://github.com/smarthomeshop/ld2450
     ref: main
-# Pick up shared tracking and stale-target fixes without product duplication.
-# Ceiling mounting metadata is intentionally reserved for CeilSense.
     files:
       - packages/ld2450-base.yaml
       - packages/ld2450-polygon-zones.yaml
     refresh: 1d
+  radar_mounting: github://smarthomeshop/radar-mounting/packages/mounting/wall.yaml@v1.0.0
+  radar_profile: github://smarthomeshop/radar-mounting/packages/radars/ld2450.yaml@v1.0.0

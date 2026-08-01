@@ -6,7 +6,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+- Added explicit wall-mounting and radar-model metadata for Room Designer to
+  UltimateSensor V1 LD2450 and every UltimateSensor V2 LD2450/LD2460 firmware
+  variant.
+- UltimateSensor V1 continues to use its factory LD2450 through the same shared
+  tracking, polygon-zone and stale-target implementation as the other products.
+- Rebuilt UltimateSensor V2 against the current shared LD2450 and LD2460
+  packages so every tracking variant exposes the same metadata contract.
 
 ## [UltimateSensor V1 2.2] - 2026-07-31
 
