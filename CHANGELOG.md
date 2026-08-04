@@ -8,7 +8,7 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ### UltimateSensor V2
 
-- Added guided post-install hardware checks when flashing UltimateSensor V2
+- Added guided post-flash hardware checks for UltimateSensor V2
   through the SmartHomeShop website, including Wi-Fi, Ethernet, local, cloud,
   Basic, Complete, LD2450 and LD2460 variants.
 

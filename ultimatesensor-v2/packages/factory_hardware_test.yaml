@@ -1,4 +1,4 @@
-# Reports guided automated and manual hardware checks to the SmartHomeShop web installer.
+# Reports guided post-flash hardware checks to the SmartHomeShop web installer.
 substitutions:
   factory_test_profile: "ultimatesensor-v2"
   factory_tracking_test_id: "ld2450"
