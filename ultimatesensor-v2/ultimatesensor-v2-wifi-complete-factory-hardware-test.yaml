@@ -1,0 +1,12 @@
+substitutions:
+  factory_test_profile: "ultimatesensor-v2-wifi-complete"
+  factory_tracking_test_id: "ld2450"
+  factory_tracking_sensor_id: radar_target_count
+  factory_tracking_success_detail: "Tracking data received"
+  factory_tracking_failure_detail: "No tracking data received"
+  factory_test_definitions: '{\"id\":\"firmware\",\"label\":\"Firmware startup\"},{\"id\":\"ld2412\",\"label\":\"LD2412 presence radar\"},{\"id\":\"ld2450\",\"label\":\"LD2450 tracking radar\"},{\"id\":\"scd41\",\"label\":\"SCD41 CO2 sensor\"},{\"id\":\"bh1750\",\"label\":\"BH1750 light sensor\"},{\"id\":\"sgp41\",\"label\":\"SGP41 VOC/NOx sensor\"},{\"id\":\"microphone\",\"label\":\"Microphone input\"},{\"id\":\"sps30\",\"label\":\"SPS30 particulate sensor\"},{\"id\":\"pir\",\"label\":\"PIR motion sensor\"},{\"id\":\"speaker\",\"label\":\"Speaker output\"},{\"id\":\"front_leds\",\"label\":\"Front LED animation\"}'
+
+packages:
+  product: !include ultimatesensor-v2-wifi-complete.yaml
+  factory_hardware_test: !include packages/factory_hardware_test.yaml
+  factory_hardware_variant: !include packages/factory_hardware_test_complete.yaml

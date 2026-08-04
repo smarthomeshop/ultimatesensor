@@ -1,0 +1,169 @@
+# Reports automated and manual factory checks to the SmartHomeShop web installer.
+substitutions:
+  factory_test_profile: "ultimatesensor-v2"
+  factory_tracking_test_id: "ld2450"
+  factory_tracking_sensor_id: radar_target_count
+  factory_tracking_success_detail: "Tracking data received"
+  factory_tracking_failure_detail: "No tracking data received"
+  factory_test_definitions: '{\"id\":\"firmware\",\"label\":\"Firmware startup\"},{\"id\":\"ld2412\",\"label\":\"LD2412 presence radar\"},{\"id\":\"ld2450\",\"label\":\"LD2450 tracking radar\"},{\"id\":\"scd41\",\"label\":\"SCD41 CO2 sensor\"},{\"id\":\"bh1750\",\"label\":\"BH1750 light sensor\"},{\"id\":\"sgp41\",\"label\":\"SGP41 VOC/NOx sensor\"},{\"id\":\"microphone\",\"label\":\"Microphone input\"},{\"id\":\"pir\",\"label\":\"PIR motion sensor\"},{\"id\":\"speaker\",\"label\":\"Speaker output\"},{\"id\":\"front_leds\",\"label\":\"Front LED animation\"}'
+
+globals:
+  - id: shs_test_ld2412_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_tracking_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_i2c_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_microphone_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_manual_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_variant_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: shs_test_failed
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+esphome:
+  on_boot:
+    - priority: 595
+      then:
+        - lambda: |-
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"begin\",\"profile\":\"${factory_test_profile}\",\"timeout\":40,\"tests\":[${factory_test_definitions}]}");
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"firmware\",\"status\":\"pass\",\"detail\":\"UltimateSensor V2 firmware started\"}");
+
+    - priority: 585
+      then:
+        - wait_until:
+            condition:
+              lambda: |-
+                return id(ld2412_firmware_version).has_state() &&
+                       std::string(id(ld2412_firmware_version).state.c_str()) != "unknown";
+            timeout: 12s
+        - if:
+            condition:
+              lambda: |-
+                return id(ld2412_firmware_version).has_state() &&
+                       std::string(id(ld2412_firmware_version).state.c_str()) != "unknown";
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"ld2412\",\"status\":\"pass\",\"detail\":\"Radar communication confirmed\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"ld2412\",\"status\":\"fail\",\"detail\":\"No firmware response from radar\"}");
+        - lambda: id(shs_test_ld2412_done) = true;
+
+    - priority: 580
+      then:
+        - wait_until:
+            condition:
+              lambda: return id(${factory_tracking_sensor_id}).has_state() && !isnan(id(${factory_tracking_sensor_id}).state);
+            timeout: 12s
+        - if:
+            condition:
+              lambda: return id(${factory_tracking_sensor_id}).has_state() && !isnan(id(${factory_tracking_sensor_id}).state);
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"${factory_tracking_test_id}\",\"status\":\"pass\",\"detail\":\"${factory_tracking_success_detail}\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"${factory_tracking_test_id}\",\"status\":\"fail\",\"detail\":\"${factory_tracking_failure_detail}\"}");
+        - lambda: id(shs_test_tracking_done) = true;
+
+    - priority: 575
+      then:
+        - delay: 3s
+        - if:
+            condition:
+              lambda: return !id(scd41).is_failed();
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"scd41\",\"status\":\"pass\",\"detail\":\"Sensor communication initialized\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"scd41\",\"status\":\"fail\",\"detail\":\"Sensor initialization failed\"}");
+        - component.update: illuminance
+        - wait_until:
+            condition:
+              lambda: return id(illuminance).has_state() && !isnan(id(illuminance).state);
+            timeout: 6s
+        - if:
+            condition:
+              lambda: return id(illuminance).has_state() && !isnan(id(illuminance).state);
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"bh1750\",\"status\":\"pass\",\"value\":%.1f,\"unit\":\"lx\"}", id(illuminance).state);
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"bh1750\",\"status\":\"fail\",\"detail\":\"No illuminance measurement\"}");
+        - if:
+            condition:
+              lambda: return !id(sgp41).is_failed();
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"sgp41\",\"status\":\"pass\",\"detail\":\"Sensor communication initialized\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"sgp41\",\"status\":\"fail\",\"detail\":\"Sensor initialization failed\"}");
+        - lambda: id(shs_test_i2c_done) = true;
+
+    - priority: 570
+      then:
+        - wait_until:
+            condition:
+              lambda: return id(microphone_rms).has_state() && !isnan(id(microphone_rms).state);
+            timeout: 8s
+        - if:
+            condition:
+              lambda: return id(microphone_rms).has_state() && !isnan(id(microphone_rms).state);
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"microphone\",\"status\":\"pass\",\"detail\":\"Audio samples received\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"microphone\",\"status\":\"fail\",\"detail\":\"No audio samples received\"}");
+        - lambda: id(shs_test_microphone_done) = true;
+
+    - priority: 565
+      then:
+        - lambda: |-
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"pir\",\"status\":\"skip\",\"detail\":\"Not tested - move in front of the PIR during manual inspection\"}");
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"speaker\",\"status\":\"skip\",\"detail\":\"Manual check - confirm the boot sound is audible\"}");
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"front_leds\",\"status\":\"skip\",\"detail\":\"Manual check - confirm the white boot fade is visible\"}");
+            id(shs_test_manual_done) = true;
+
+    - priority: 500
+      then:
+        - wait_until:
+            condition:
+              lambda: |-
+                return id(shs_test_ld2412_done) && id(shs_test_tracking_done) &&
+                       id(shs_test_i2c_done) && id(shs_test_microphone_done) &&
+                       id(shs_test_manual_done) && id(shs_test_variant_done);
+            timeout: 35s
+        - lambda: |-
+            const bool finished =
+              id(shs_test_ld2412_done) && id(shs_test_tracking_done) &&
+              id(shs_test_i2c_done) && id(shs_test_microphone_done) &&
+              id(shs_test_manual_done) && id(shs_test_variant_done);
+            const bool passed = finished && !id(shs_test_failed);
+            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"result\",\"status\":\"%s\"}", passed ? "pass" : "fail");

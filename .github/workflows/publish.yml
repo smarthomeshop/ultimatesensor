@@ -546,7 +546,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Basic
       clean: false
       esphome_version: latest
@@ -560,7 +560,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Complete
       clean: false
       esphome_version: latest
@@ -574,7 +574,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Basic
       clean: false
       esphome_version: latest
@@ -588,7 +588,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Complete
       clean: false
       esphome_version: latest
@@ -602,7 +602,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Basic LD2460
       clean: false
       esphome_version: latest
@@ -616,7 +616,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Complete LD2460
       clean: false
       esphome_version: latest
@@ -630,7 +630,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Basic LD2460
       clean: false
       esphome_version: latest
@@ -644,7 +644,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Complete LD2460
       clean: false
       esphome_version: latest
@@ -714,7 +714,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Basic Cloud
       clean: false
       esphome_version: latest
@@ -728,7 +728,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Complete Cloud
       clean: false
       esphome_version: latest
@@ -742,7 +742,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Basic Cloud
       clean: false
       esphome_version: latest
@@ -756,7 +756,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Complete Cloud
       clean: false
       esphome_version: latest
@@ -770,7 +770,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-basic-ld2460-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Basic LD2460 Cloud
       clean: false
       esphome_version: latest
@@ -784,7 +784,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-wifi-complete-ld2460-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 WiFi Complete LD2460 Cloud
       clean: false
       esphome_version: latest
@@ -798,7 +798,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-basic-ld2460-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Basic LD2460 Cloud
       clean: false
       esphome_version: latest
@@ -812,7 +812,7 @@ jobs:
     if: needs.detect-changes.outputs.v2_build == 'true'
     uses: ./.github/workflows/esphome-build.yml
     with:
-      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460-cloud.yaml
+      files: ultimatesensor-v2/ultimatesensor-v2-ethernet-complete-ld2460-cloud-factory-hardware-test.yaml
       name: UltimateSensor V2 Ethernet Complete LD2460 Cloud
       clean: false
       esphome_version: latest

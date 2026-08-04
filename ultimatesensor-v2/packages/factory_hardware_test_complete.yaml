@@ -1,0 +1,22 @@
+esphome:
+  on_boot:
+    - priority: 560
+      then:
+        - sps30.start_measurement: sps30_sensor
+        - delay: 3s
+        - component.update: sps30_sensor
+        - wait_until:
+            condition:
+              lambda: return id(PM_2_5).has_state() && !isnan(id(PM_2_5).state);
+            timeout: 15s
+        - if:
+            condition:
+              lambda: return id(PM_2_5).has_state() && !isnan(id(PM_2_5).state);
+            then:
+              - lambda: |-
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"sps30\",\"status\":\"pass\",\"value\":%.1f,\"unit\":\"ug/m3\"}", id(PM_2_5).state);
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"sps30\",\"status\":\"fail\",\"detail\":\"No particulate measurement\"}");
+        - lambda: id(shs_test_variant_done) = true;

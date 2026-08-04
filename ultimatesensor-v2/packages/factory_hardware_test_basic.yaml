@@ -1,0 +1,5 @@
+esphome:
+  on_boot:
+    - priority: 560
+      then:
+        - lambda: id(shs_test_variant_done) = true;

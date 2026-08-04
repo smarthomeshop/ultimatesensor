@@ -302,8 +302,10 @@ sensor:
       channels: [0]
       gain_factor: 1
     rms:
+      id: microphone_rms
       name: "Microphone RMS"
     peak:
+      id: microphone_peak
       name: "Microphone Peak"
     measurement_duration: 200ms
 
@@ -588,6 +590,7 @@ text_sensor:
   - platform: ld2412
     ld2412_id: ld2412_radar
     version:
+      id: ld2412_firmware_version
       name: "LD2412 Firmware"
       entity_category: diagnostic
     mac_address:
