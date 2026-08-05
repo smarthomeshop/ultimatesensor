@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor V2 Ethernet Complete",
-  "version": "1.12",
+  "version": "1.13",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-ethernet-complete/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "6bf14be355a2a204e7280355a791943b"
+        "md5": "6b54c58824964d5785d1fb8bced330ed"
       },
       "parts": [
         {

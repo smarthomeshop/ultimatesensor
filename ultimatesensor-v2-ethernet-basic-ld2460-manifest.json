@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor V2 Ethernet Basic LD2460",
-  "version": "1.12",
+  "version": "1.13",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-ethernet-basic-ld2460/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "4b6214d66613dc9b81c2bd9af7bb66e5"
+        "md5": "75686e96f0851a0fe22e485d04d18cd6"
       },
       "parts": [
         {
