@@ -8,6 +8,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 - Add customer-facing firmware notes here before merging a PR.
 
+### UltimateSensor V2
+
+- Fixed SCD41 temperature and humidity correction so the built-in sensor
+  compensation is no longer also added to the published measurements.
+- Added saved Temperature Offset and Humidity Offset controls for per-device
+  fine-tuning in Home Assistant and the device web interface.
+
 ## [UltimateSensor V2 1.11] - 2026-08-04
 
 
