@@ -28,14 +28,6 @@ esphome:
             then:
               - script.execute: cloud_register
 
-time:
-  - platform: sntp
-    id: sntp_cloud_time
-    timezone: "Europe/Amsterdam"
-    servers:
-      - "pool.ntp.org"
-      - "time.google.com"
-
 globals:
   - id: cloud_device_token
     type: std::string
@@ -228,6 +220,7 @@ script:
             root["firmware_version"] = "${ultimatesensor_software_version}";
             root["product"] = "ultimatesensor";
             root["local_ip"] = id(${cloud_ip_sensor_id}).state;
+            root["configuration_protocol_version"] = 1;
           capture_response: true
           max_response_buffer_size: 512
           on_response:
@@ -290,7 +283,7 @@ script:
           max_response_buffer_size: 256
           json: |-
             root["device_id"] = id(cloud_device_id);
-            root["timestamp"] = id(sntp_cloud_time).now().timestamp;
+            root["timestamp"] = id(local_led_time).now().timestamp;
 
             if (id(scd41_co2).has_state() && !isnan(id(scd41_co2).state)) {
               root["co2_ppm"] = id(scd41_co2).state;
@@ -338,6 +331,7 @@ script:
 
             root["firmware_version"] = "${ultimatesensor_software_version}";
             root["hardware_version"] = "${ultimatesensor_hardware_version}";
+            root["configuration_protocol_version"] = 1;
           on_response:
             then:
               - lambda: |-

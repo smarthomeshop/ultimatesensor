@@ -4,6 +4,7 @@
 substitutions:
   ld2450_uart_tx_pin: GPIO15
   ld2450_uart_rx_pin: GPIO02
+  tracking_motion_sensor_id: tracking_moving_target
   # The V1 PCB needs the ESP32 input pull-up on the LD2450 RX connection.
   ld2450_uart_rx_pullup: "true"
 

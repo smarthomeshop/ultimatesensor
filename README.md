@@ -57,6 +57,7 @@ The Basic firmware uses the shared configuration without the SPS30 particulate m
   Home Assistant Voice Assistant or SmartHomeShop Cloud Voice firmware
 - OLED display with Home Assistant LCD display control
 - RGB back light and ESP status LED
+- Optional automatic motion light, scheduled night light, and CO2 warning light
 - WiFi firmware with captive portal fallback
 - Ethernet firmware for wired connectivity and PoE installations
 - Optional SPS30 particulate matter sensing in the Complete variant

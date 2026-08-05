@@ -60,6 +60,7 @@ i2c:
 light:
   # WS2812B LED at the back
   - platform: esp32_rmt_led_strip
+    id: rgb_back_led
     pin: GPIO13
     num_leds: 1
     rgb_order: GRB
