@@ -6,19 +6,25 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V2
+- Add customer-facing firmware notes here before merging a PR.
 
-- SmartHomeShop App cloud firmware now also exposes the automatic motion
-  light, night light and CO2 warning settings to Home Assistant and the local
-  device web interface.
+## [UltimateSensor V1 2.4] - 2026-08-05
 
-### UltimateSensor V1
 
 - Added optional automatic LED lighting with a white motion light, a warm
   scheduled night light, and orange/red CO2 warning flashes.
 - All automatic lighting features default to off, retain their settings after
   a restart, and can also be configured through the SmartHomeShop App when
   cloud firmware is installed.
+
+
+## [UltimateSensor V2 1.13] - 2026-08-05
+
+
+- SmartHomeShop App cloud firmware now also exposes the automatic motion
+  light, night light and CO2 warning settings to Home Assistant and the local
+  device web interface.
+
 
 ## [UltimateSensor V2 1.12] - 2026-08-05
 

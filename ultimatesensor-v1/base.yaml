@@ -4,7 +4,7 @@
 substitutions:
   # Bumped by the release workflow. Defined here (not per variant) so every V1
   # firmware reports the same version, matching how V2 is set up.
-  ultimatesensor_software_version: "2.3"
+  ultimatesensor_software_version: "2.4"
 
 # Esphome start
 esphome:
