@@ -45,6 +45,10 @@ void CloudVoice::setup() {
 
     if (this->state_ == State::REPLYING) {
       if (active) {
+        if (!this->playback_started_) {
+          ESP_LOGI(TAG, "Response playback started after %lums",
+                   static_cast<unsigned long>(millis() - this->playback_started_ms_));
+        }
         this->playback_started_ = true;
       } else if (this->playback_started_) {
         this->playback_finished_.store(true);
@@ -72,9 +76,10 @@ void CloudVoice::dump_config() {
                 "  API: %s\n"
                 "  Max recording: %us\n"
                 "  PSRAM recording buffer: %u bytes\n"
-                "  RMS speech/silence: %u/%u",
+                "  RMS speech/silence: %u/%u\n"
+                "  Adaptive noise margins: +%u/+%u",
                 this->api_url_.c_str(), this->max_recording_seconds_, static_cast<unsigned>(this->audio_capacity_),
-                this->speech_rms_, this->silence_rms_);
+                this->speech_rms_, this->silence_rms_, SPEECH_NOISE_MARGIN_RMS, SILENCE_NOISE_MARGIN_RMS);
 }
 
 void CloudVoice::loop() {
@@ -194,10 +199,16 @@ void CloudVoice::start_recording_(bool follow_up) {
   }
 
   this->micro_wake_word_->stop();
+  this->last_error_code_.clear();
   this->audio_size_ = 0;
   this->speech_started_ = false;
+  this->capture_ended_by_silence_ = false;
   this->silent_follow_up_ = false;
   this->current_is_follow_up_ = follow_up;
+  this->speech_frames_ = 0;
+  this->speech_activity_frames_ = 0;
+  this->last_rms_ = 0;
+  this->peak_rms_ = 0;
   this->capture_started_ms_ = millis();
   this->last_speech_ms_ = this->capture_started_ms_;
   this->capture_complete_.store(false);
@@ -208,7 +219,15 @@ void CloudVoice::start_recording_(bool follow_up) {
 }
 
 void CloudVoice::handle_audio_(const std::vector<uint8_t> &data) {
-  if (!this->capturing_.load() || data.empty()) {
+  if (data.empty()) {
+    return;
+  }
+
+  const uint16_t rms = calculate_rms_(data.data(), data.size());
+  if (!this->capturing_.load()) {
+    if (this->state_ == State::IDLE && !this->external_announcement_) {
+      this->update_noise_floor_(rms);
+    }
     return;
   }
 
@@ -220,12 +239,31 @@ void CloudVoice::handle_audio_(const std::vector<uint8_t> &data) {
   }
 
   const uint32_t now = millis();
-  const uint16_t rms = calculate_rms_(data.data(), data.size());
-  if (rms >= this->speech_rms_) {
-    this->speech_started_ = true;
-    this->last_speech_ms_ = now;
-  } else if (rms > this->silence_rms_ && this->speech_started_) {
-    this->last_speech_ms_ = now;
+  this->last_rms_ = rms;
+  this->peak_rms_ = std::max(this->peak_rms_, rms);
+
+  if (!this->speech_started_) {
+    if (rms < this->effective_speech_rms_()) {
+      this->update_noise_floor_(rms);
+    }
+
+    if (rms >= this->effective_speech_rms_()) {
+      this->speech_frames_ = std::min<uint8_t>(this->speech_frames_ + 1, SPEECH_START_FRAMES);
+      if (this->speech_frames_ >= SPEECH_START_FRAMES) {
+        this->speech_started_ = true;
+        this->last_speech_ms_ = now;
+      }
+    } else {
+      this->speech_frames_ = 0;
+    }
+  } else if (rms >= this->effective_silence_rms_()) {
+    this->speech_activity_frames_ =
+        std::min<uint8_t>(this->speech_activity_frames_ + 1, SPEECH_ACTIVITY_FRAMES);
+    if (this->speech_activity_frames_ >= SPEECH_ACTIVITY_FRAMES) {
+      this->last_speech_ms_ = now;
+    }
+  } else {
+    this->speech_activity_frames_ = 0;
   }
 
   const uint32_t elapsed = now - this->capture_started_ms_;
@@ -238,6 +276,7 @@ void CloudVoice::handle_audio_(const std::vector<uint8_t> &data) {
       this->speech_started_ && elapsed >= this->min_recording_ms_ && now - this->last_speech_ms_ >= this->silence_ms_;
 
   if (timed_out || end_of_speech) {
+    this->capture_ended_by_silence_ = end_of_speech;
     this->silent_follow_up_ = this->current_is_follow_up_ && !this->speech_started_;
     this->capturing_.store(false);
     this->capture_complete_.store(true);
@@ -246,6 +285,12 @@ void CloudVoice::handle_audio_(const std::vector<uint8_t> &data) {
 
 void CloudVoice::finish_capture_() {
   this->microphone_source_->stop();
+  ESP_LOGI(TAG,
+           "Capture finished after %lums (%u bytes): reason=%s, speech=%s, last/peak/noise RMS=%u/%u/%u, "
+           "effective speech/silence=%u/%u",
+           static_cast<unsigned long>(millis() - this->capture_started_ms_), static_cast<unsigned>(this->audio_size_),
+           this->capture_ended_by_silence_ ? "silence" : "timeout", YESNO(this->speech_started_), this->last_rms_,
+           this->peak_rms_, this->noise_floor_rms_, this->effective_speech_rms_(), this->effective_silence_rms_());
   if (!this->cloud_enabled_ || !this->user_enabled_) {
     this->finish_to_idle_();
     return;
@@ -278,6 +323,7 @@ void CloudVoice::launch_upload_() {
   this->request_device_id_ = this->device_id_;
   this->request_token_ = this->token_;
   this->request_conversation_id_ = this->conversation_id_;
+  this->upload_started_ms_ = millis();
 
   const BaseType_t result =
       xTaskCreatePinnedToCore(upload_task_, "cloud_voice_http", 16384, this, 2, &this->upload_task_handle_,
@@ -403,6 +449,8 @@ void CloudVoice::perform_upload_() {
 }
 
 void CloudVoice::handle_upload_result_() {
+  ESP_LOGI(TAG, "Cloud response completed in %lums with HTTP %d",
+           static_cast<unsigned long>(millis() - this->upload_started_ms_), this->upload_status_);
   if (!this->cloud_enabled_ || !this->user_enabled_ || !this->wake_word_switch_->state) {
     this->response_continue_conversation_ = false;
     this->finish_to_idle_();
@@ -495,6 +543,7 @@ void CloudVoice::fail_(const char *code) {
   }
   this->response_continue_conversation_ = false;
   this->follow_up_turn_ = 0;
+  this->last_error_code_ = code;
   this->set_state_(State::ERROR);
   ESP_LOGW(TAG, "Cloud Voice error: %s", code);
   this->error_trigger_.trigger();
@@ -519,6 +568,31 @@ void CloudVoice::resume_wake_word_() {
     this->micro_wake_word_->stop();
     this->micro_wake_word_->start();
   }
+}
+
+void CloudVoice::update_noise_floor_(uint16_t rms) {
+  if (this->noise_floor_rms_ == 0) {
+    this->noise_floor_rms_ = rms;
+    return;
+  }
+
+  if (rms <= this->noise_floor_rms_) {
+    this->noise_floor_rms_ = static_cast<uint16_t>((3UL * this->noise_floor_rms_ + rms) / 4UL);
+    return;
+  }
+
+  const uint16_t bounded_rms = std::min<uint16_t>(rms, this->noise_floor_rms_ + 8);
+  this->noise_floor_rms_ = static_cast<uint16_t>((31UL * this->noise_floor_rms_ + bounded_rms) / 32UL);
+}
+
+uint16_t CloudVoice::effective_speech_rms_() const {
+  return std::max<uint16_t>(this->speech_rms_,
+                            std::min<uint32_t>(32767, this->noise_floor_rms_ + SPEECH_NOISE_MARGIN_RMS));
+}
+
+uint16_t CloudVoice::effective_silence_rms_() const {
+  return std::max<uint16_t>(this->silence_rms_,
+                            std::min<uint32_t>(32767, this->noise_floor_rms_ + SILENCE_NOISE_MARGIN_RMS));
 }
 
 void CloudVoice::set_state_(State state) { this->state_ = state; }

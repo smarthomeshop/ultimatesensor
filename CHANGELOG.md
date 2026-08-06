@@ -6,7 +6,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+### UltimateSensor V2
+
+- Improved Cloud Voice speech detection in rooms with varying background
+  noise, with faster handling after the user finishes speaking.
+- Added a clear spoken message when the Cloud Voice usage limit has been
+  reached instead of showing only an error light.
+- Improved Cloud Voice timing diagnostics and response reliability.
 
 ## [UltimateSensor V1 2.5] - 2026-08-06
 

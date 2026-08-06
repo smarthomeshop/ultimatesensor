@@ -55,6 +55,7 @@ class CloudVoice final : public Component {
   void start();
 
   const char *state_name() const;
+  const std::string &last_error_code() const { return this->last_error_code_; }
 
   Trigger<> *get_listening_trigger() { return &this->listening_trigger_; }
   Trigger<> *get_processing_trigger() { return &this->processing_trigger_; }
@@ -71,6 +72,10 @@ class CloudVoice final : public Component {
   static constexpr uint32_t ERROR_MESSAGE_DURATION_MS = 6500;
   static constexpr uint32_t RESUME_DELAY_MS = 750;
   static constexpr uint8_t HARD_MAX_FOLLOW_UP_TURNS = 2;
+  static constexpr uint8_t SPEECH_START_FRAMES = 3;
+  static constexpr uint8_t SPEECH_ACTIVITY_FRAMES = 2;
+  static constexpr uint16_t SPEECH_NOISE_MARGIN_RMS = 18;
+  static constexpr uint16_t SILENCE_NOISE_MARGIN_RMS = 20;
 
   void handle_audio_(const std::vector<uint8_t> &data);
   void start_recording_(bool follow_up);
@@ -87,6 +92,9 @@ class CloudVoice final : public Component {
   void resume_wake_word_();
   bool may_listen_() const;
   void set_state_(State state);
+  void update_noise_floor_(uint16_t rms);
+  uint16_t effective_speech_rms_() const;
+  uint16_t effective_silence_rms_() const;
   static void write_wav_header_(uint8_t header[WAV_HEADER_SIZE], uint32_t pcm_size);
   static uint16_t calculate_rms_(const uint8_t *data, size_t length);
 
@@ -110,6 +118,7 @@ class CloudVoice final : public Component {
   std::string request_conversation_id_;
   std::string response_body_;
   std::string upload_error_;
+  std::string last_error_code_;
   std::string response_audio_url_;
 
   uint8_t *audio_buffer_{nullptr};
@@ -119,16 +128,22 @@ class CloudVoice final : public Component {
   uint32_t last_speech_ms_{0};
   uint32_t resume_at_ms_{0};
   uint32_t playback_started_ms_{0};
+  uint32_t upload_started_ms_{0};
   uint32_t conversation_last_activity_ms_{0};
   uint32_t min_recording_ms_{2500};
   uint32_t silence_ms_{900};
   uint16_t speech_rms_{50};
   uint16_t silence_rms_{30};
+  uint16_t noise_floor_rms_{30};
+  uint16_t last_rms_{0};
+  uint16_t peak_rms_{0};
   uint8_t max_recording_seconds_{8};
   uint8_t follow_up_timeout_seconds_{8};
   uint8_t max_follow_up_turns_{2};
   uint8_t follow_up_turn_{0};
   uint8_t speaker_volume_{40};
+  uint8_t speech_frames_{0};
+  uint8_t speech_activity_frames_{0};
   int upload_status_{0};
 
   std::atomic<bool> capturing_{false};
@@ -141,6 +156,7 @@ class CloudVoice final : public Component {
   bool cloud_enabled_{false};
   bool user_enabled_{true};
   bool speech_started_{false};
+  bool capture_ended_by_silence_{false};
   bool silent_follow_up_{false};
   bool current_is_follow_up_{false};
   bool follow_up_enabled_{true};

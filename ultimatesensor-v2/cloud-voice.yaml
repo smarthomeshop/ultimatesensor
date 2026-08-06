@@ -65,10 +65,10 @@ cloud_voice:
   micro_wake_word: micro_wake_word_01
   wake_word_switch: use_wake_word
   max_recording_seconds: 8
-  min_recording_seconds: 2.5
-  silence_seconds: 0.9
+  min_recording_seconds: 1.5
+  silence_seconds: 0.75
   speech_rms: 50
-  silence_rms: 30
+  silence_rms: 60
   on_listening:
     - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
     - light.turn_on:
@@ -105,13 +105,31 @@ cloud_voice:
         blue: 0%
         brightness: 100%
         effect: none
-    - media_player.volume_set:
-        id: media_player_01
-        volume: !lambda "return id(cloud_speaker_volume) / 100.0f;"
-    - media_player.speaker.play_on_device_media_file:
-        id: media_player_01
-        media_file: voice_not_configured_file
-        announcement: true
+    - if:
+        condition:
+          lambda: return id(cloud_voice_client).last_error_code() == "voice_quota_exceeded";
+        then:
+          - media_player.volume_set:
+              id: media_player_01
+              volume: !lambda "return id(cloud_speaker_volume) / 100.0f;"
+          - media_player.speaker.play_on_device_media_file:
+              id: media_player_01
+              media_file: voice_limit_reached_file
+              announcement: true
+        else:
+          - if:
+              condition:
+                lambda: |-
+                  const std::string &error = id(cloud_voice_client).last_error_code();
+                  return error == "cloud_voice_not_ready" || error == "invalid_token";
+              then:
+                - media_player.volume_set:
+                    id: media_player_01
+                    volume: !lambda "return id(cloud_speaker_volume) / 100.0f;"
+                - media_player.speaker.play_on_device_media_file:
+                    id: media_player_01
+                    media_file: voice_not_configured_file
+                    announcement: true
   on_idle:
     - if:
         condition:
