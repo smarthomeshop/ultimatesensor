@@ -6,7 +6,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V1
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 2.5] - 2026-08-06
+
 
 - Added optional SPS30 quiet hours with saved start and end hours. During the
   configured period the particulate matter sensor stops its fan and laser,
@@ -16,7 +19,9 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 - SmartHomeShop App cloud firmware can receive and acknowledge the same SPS30
   quiet-hours settings while remaining compatible with older app versions.
 
-### UltimateSensor V2
+
+## [UltimateSensor V2 1.14] - 2026-08-06
+
 
 - Added optional SPS30 quiet hours with saved start and end hours. During the
   configured period the particulate matter sensor stops its fan and laser,
@@ -25,6 +30,7 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   schedule, plus an active-status entity.
 - SmartHomeShop App cloud firmware can receive and acknowledge the same SPS30
   quiet-hours settings while remaining compatible with older app versions.
+
 
 ## [UltimateSensor V1 2.4] - 2026-08-05
 
