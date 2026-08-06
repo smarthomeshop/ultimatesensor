@@ -29,6 +29,7 @@ packages:
   tracking: !include tracking-ld2450.yaml
   lighting: !include led-lighting.yaml
   cloud_lighting: !include cloud-lighting.yaml
+  cloud_sps30_quiet: !include cloud-sps30-quiet-hours.yaml
   net: !include wifi.yaml
   variant: !include complete.yaml
   cloud: !include cloud.yaml
