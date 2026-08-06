@@ -1,5 +1,5 @@
 # Complete variant configuration.
-# Adds the SPS30 particulate matter sensor and PM idle controls.
+# Adds the SPS30 particulate matter sensor, idle cycle and quiet-hour controls.
 
 substitutions:
   sps30_time_id: local_led_time

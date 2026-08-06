@@ -1,5 +1,5 @@
 # Complete variant configuration
-# Adds the SPS30 particulate matter sensor and PM/night-mode controls.
+# Adds the SPS30 particulate matter sensor, idle cycle and quiet-hour controls.
 # SPS30 measurement behavior is aligned with UltimateSensor Mini.
 
 substitutions:
