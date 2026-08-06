@@ -35,6 +35,10 @@ Standard variants are for the product as shipped with LD2412 + LD2450.
 
 LD2460 upgrade variants are only for devices where the LD2450 module has been removed/replaced by the optional LD2460 module.
 
+Read [LD2460 Upgrade and Calibration](LD2460-UPGRADE.md) before mounting the
+optional module. Module orientation, wall mode, installation height and angle
+all affect the reported coordinates.
+
 | File | Network | SPS30 | Tracking radar | Voice service |
 | --- | --- | --- | --- | --- |
 | `ultimatesensor-v2-wifi-basic-ld2460.yaml` | WiFi | No | LD2460 | Home Assistant |
@@ -58,6 +62,8 @@ ESPHome Ethernet and WiFi are kept as separate firmware variants. The WiFi varia
 - LD2450 tracking and zones are maintained centrally in `smarthomeshop/ld2450`.
 - LD2460 tracking and zones are maintained centrally in `smarthomeshop/ld2460`.
 - These local tracking files only select the correct product pins and shared packages.
+- LD2460 firmware verifies `side` installation mode after every boot and reads
+  the saved installation height and angle back from the radar.
 
 ## Pin Map
 

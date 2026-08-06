@@ -13,6 +13,13 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 - Added a clear spoken message when the Cloud Voice usage limit has been
   reached instead of showing only an error light.
 - Improved Cloud Voice timing diagnostics and response reliability.
+- Fixed LD2460 startup configuration being skipped once target reports had
+  already started, which left the installation-mode entity `unknown` after a
+  reboot.
+- LD2460 upgrade firmware now verifies wall/side mode and exposes the saved
+  radar installation height and angle for adjustment and readback.
+- Added a dedicated LD2460 orientation and calibration guide, including
+  reflective-surface and duplicate-target troubleshooting.
 
 ## [UltimateSensor V1 2.5] - 2026-08-06
 

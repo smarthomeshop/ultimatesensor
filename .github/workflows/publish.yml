@@ -9,6 +9,11 @@ on:
         required: false
         type: boolean
         default: false
+      force_v2:
+        description: "Build and release only UltimateSensor V2 variants"
+        required: false
+        type: boolean
+        default: false
   # Scheduled build: rebuild all firmware monthly with latest ESPHome.
   # ESPHome releases typically land around the 15th, so we rebuild on the
   # 20th to pick up the new release a few days later after initial fixes.
@@ -140,6 +145,15 @@ jobs:
             echo "Force building all variants"
             echo "v1=true" >> "$GITHUB_OUTPUT"
             echo "v1_build=true" >> "$GITHUB_OUTPUT"
+            echo "v2=true" >> "$GITHUB_OUTPUT"
+            echo "v2_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_v2 }}" == "true" ]]; then
+            echo "Force building UltimateSensor V2 variants only"
+            echo "v1=false" >> "$GITHUB_OUTPUT"
+            echo "v1_build=false" >> "$GITHUB_OUTPUT"
             echo "v2=true" >> "$GITHUB_OUTPUT"
             echo "v2_build=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -299,7 +313,10 @@ jobs:
           version_for_change "v2_version" "$V2_VERSION_FILE" "ultimatesensor_software_version" "1.0" "${{ steps.changes.outputs.v2 }}" "ultimatesensor-v2"
 
       - name: Commit version updates and create tags
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: >-
+          (github.event_name == 'push' ||
+           (github.event_name == 'workflow_dispatch' && inputs.force_v2 == true)) &&
+          github.ref == 'refs/heads/main'
         shell: bash
         run: |
           set -euo pipefail
@@ -1205,7 +1222,8 @@ jobs:
     # (for example when only one hardware version changed).
     if: >-
       always() &&
-      github.event_name == 'push' &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' && inputs.force_v2 == true)) &&
       github.ref == 'refs/heads/main' &&
       needs.detect-changes.result == 'success' &&
       needs.publish-gh-pages.result == 'success'

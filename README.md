@@ -123,6 +123,9 @@ We publish customer-facing WiFi and Ethernet firmware variants for V1 and V2 har
 5. For V2 LD2460 upgrades, physically replace/remove the LD2450 module first, leave LD2412 installed, and flash one of the `*-ld2460` firmware files.
 6. Use the LCD display, PM sensor, and Night Mode controls from Home Assistant where available.
 
+For LD2460 module orientation and wall calibration, follow the
+[UltimateSensor V2 LD2460 upgrade guide](ultimatesensor-v2/LD2460-UPGRADE.md).
+
 Web flasher: https://smarthomeshop.io/en/firmware
 Product page: https://ultimatesensor.nl/en
 
