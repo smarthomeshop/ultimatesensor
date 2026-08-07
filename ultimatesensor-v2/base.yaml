@@ -2,7 +2,7 @@
 # Shared ESP32-S3 hardware, sensors, radar, PIR, and audio stack for all V2 variants.
 
 substitutions:
-  ultimatesensor_software_version: "1.15"
+  ultimatesensor_software_version: "1.16"
   log_level: "INFO"
   # Self-heating compensation, subtracted inside the SCD41 itself (the sensor
   # also re-compensates humidity for this internally). Per-device fine-tuning
