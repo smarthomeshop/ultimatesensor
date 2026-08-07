@@ -6,7 +6,10 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V2
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V2 1.15] - 2026-08-07
+
 
 - Improved Cloud Voice speech detection in rooms with varying background
   noise, with faster handling after the user finishes speaking.
@@ -20,6 +23,7 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
   radar installation height and angle for adjustment and readback.
 - Added a dedicated LD2460 orientation and calibration guide, including
   reflective-surface and duplicate-target troubleshooting.
+
 
 ## [UltimateSensor V1 2.5] - 2026-08-06
 
