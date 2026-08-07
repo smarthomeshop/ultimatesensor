@@ -2,7 +2,7 @@
   "chipFamily": "ESP32-S3",
   "ota": {
     "path": "ultimatesensor-v2-esp32s3.ota.bin",
-    "md5": "b914d16a85083b2a9e3be53b992ae13d"
+    "md5": "4e1746c7d9bb0cb28b304f9f4766459a"
   },
   "parts": [
     {

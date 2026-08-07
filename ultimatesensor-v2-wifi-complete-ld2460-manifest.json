@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor V2 WiFi Complete LD2460",
-  "version": "1.15",
+  "version": "1.16",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-wifi-complete-ld2460/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "cfa8288a1999716305f05fc83832b42e"
+        "md5": "920de51d7a63c1a2d4886e89206f8a8d"
       },
       "parts": [
         {
