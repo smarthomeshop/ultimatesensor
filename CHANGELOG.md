@@ -6,7 +6,11 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+### UltimateSensor V2
+
+- Fixed the web installer's hardware test incorrectly reporting that the
+  firmware did not start the test. The complete test list now fits in the
+  serial log buffer for every V2 firmware variant.
 
 ## [UltimateSensor V1 2.6] - 2026-08-07
 

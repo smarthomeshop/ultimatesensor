@@ -7,6 +7,9 @@ substitutions:
   factory_tracking_failure_detail: "No tracking data received"
   factory_test_definitions: '{\"id\":\"firmware\",\"label\":\"Firmware startup\"},{\"id\":\"ld2412\",\"label\":\"LD2412 presence radar\"},{\"id\":\"ld2450\",\"label\":\"LD2450 tracking radar\"},{\"id\":\"scd41\",\"label\":\"SCD41 CO2 sensor\"},{\"id\":\"bh1750\",\"label\":\"BH1750 light sensor\"},{\"id\":\"sgp41\",\"label\":\"SGP41 VOC/NOx sensor\"},{\"id\":\"microphone\",\"label\":\"Microphone input\"},{\"id\":\"pir\",\"label\":\"PIR motion sensor\"},{\"id\":\"speaker\",\"label\":\"Speaker output\"},{\"id\":\"front_leds\",\"label\":\"Front LED animation\"}'
 
+logger:
+  tx_buffer_size: 1024
+
 globals:
   - id: shs_test_ld2412_done
     type: bool
