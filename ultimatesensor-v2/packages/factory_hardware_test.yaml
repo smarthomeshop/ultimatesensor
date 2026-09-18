@@ -27,6 +27,10 @@ globals:
     type: bool
     restore_value: no
     initial_value: "false"
+  - id: shs_test_pir_done
+    type: bool
+    restore_value: no
+    initial_value: "false"
   - id: shs_test_manual_done
     type: bool
     restore_value: no
@@ -146,10 +150,40 @@ esphome:
                   ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"microphone\",\"status\":\"fail\",\"detail\":\"No audio samples received\"}");
         - lambda: id(shs_test_microphone_done) = true;
 
+    - priority: 566
+      then:
+        - delay: 3s
+        - wait_until:
+            condition:
+              lambda: return id(pir_motion).has_state() && !id(pir_motion).state;
+            timeout: 5s
+        - if:
+            condition:
+              lambda: return id(pir_motion).has_state() && !id(pir_motion).state;
+            then:
+              - wait_until:
+                  condition:
+                    lambda: return id(pir_motion).has_state() && id(pir_motion).state;
+                  timeout: 25s
+              - if:
+                  condition:
+                    lambda: return id(pir_motion).has_state() && id(pir_motion).state;
+                  then:
+                    - lambda: |-
+                        ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"pir\",\"status\":\"pass\",\"value\":\"Ja\",\"detail\":\"Beweging gedetecteerd na rustsignaal\"}");
+                  else:
+                    - lambda: |-
+                        id(shs_test_failed) = true;
+                        ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"pir\",\"status\":\"fail\",\"value\":\"Nee\",\"detail\":\"Geen beweging gedetecteerd. Beweeg voor de PIR en test opnieuw; dit bewijst geen defect\"}");
+            else:
+              - lambda: |-
+                  id(shs_test_failed) = true;
+                  ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"pir\",\"status\":\"fail\",\"value\":\"Niet bevestigd\",\"detail\":\"Geen rustsignaal ontvangen. Houd de PIR even vrij en test opnieuw\"}");
+        - lambda: id(shs_test_pir_done) = true;
+
     - priority: 565
       then:
         - lambda: |-
-            ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"pir\",\"status\":\"skip\",\"detail\":\"Not tested - move in front of the PIR during manual inspection\"}");
             ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"speaker\",\"status\":\"skip\",\"detail\":\"Manual check - confirm the boot sound is audible\"}");
             ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"test\",\"id\":\"front_leds\",\"status\":\"skip\",\"detail\":\"Manual check - confirm the white boot fade is visible\"}");
             id(shs_test_manual_done) = true;
@@ -161,12 +195,12 @@ esphome:
               lambda: |-
                 return id(shs_test_ld2412_done) && id(shs_test_tracking_done) &&
                        id(shs_test_i2c_done) && id(shs_test_microphone_done) &&
-                       id(shs_test_manual_done) && id(shs_test_variant_done);
+                       id(shs_test_pir_done) && id(shs_test_manual_done) && id(shs_test_variant_done);
             timeout: 35s
         - lambda: |-
             const bool finished =
               id(shs_test_ld2412_done) && id(shs_test_tracking_done) &&
               id(shs_test_i2c_done) && id(shs_test_microphone_done) &&
-              id(shs_test_manual_done) && id(shs_test_variant_done);
+              id(shs_test_pir_done) && id(shs_test_manual_done) && id(shs_test_variant_done);
             const bool passed = finished && !id(shs_test_failed);
             ESP_LOGI("shs_test", "SHS_TEST/1 {\"type\":\"result\",\"status\":\"%s\"}", passed ? "pass" : "fail");

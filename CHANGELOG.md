@@ -6,6 +6,12 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+### UltimateSensor V2
+
+- The post-flash PIR test now checks for a real idle-to-motion transition and
+  reports whether motion was detected instead of always skipping this test.
+  Move in front of the PIR during the hardware test after the device restarts.
+
 - Add customer-facing firmware notes here before merging a PR.
 
 ## [UltimateSensor V2 1.17] - 2026-09-18
