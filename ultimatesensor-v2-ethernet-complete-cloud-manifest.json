@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-ethernet-complete-cloud/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "9d54c197d4f77b7e3b1e30ed87a669ce"
+        "md5": "e826f63dce0c364db22e6401dc276af6"
       },
       "parts": [
         {
