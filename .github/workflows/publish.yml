@@ -41,6 +41,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify immutable radar dependency versions
+        run: python3 .github/scripts/check-radar-dependency-pins.py ultimatesensor-v1 ultimatesensor-v2
+
       - name: Require changelog update for firmware changes
         shell: bash
         run: |
@@ -480,8 +483,8 @@ jobs:
           fi
 
           if [[ "$changes_made" == "true" ]] && ! git diff --quiet; then
-            git config --local user.email "action@github.com"
-            git config --local user.name "GitHub Action"
+            git config --local user.email "info@dwain.nl"
+            git config --local user.name "dwainscheeren"
             git add CHANGELOG.md "${version_files_v1[@]}" "${version_files_v2[@]}"
 
             msg="chore: update versions"
