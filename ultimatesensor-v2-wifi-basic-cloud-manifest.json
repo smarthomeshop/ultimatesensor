@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor V2 WiFi Basic Cloud",
-  "version": "1.18",
+  "version": "1.19",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32-S3",
       "ota": {
         "path": "ultimatesensor-v2-wifi-basic-cloud/ultimatesensor-v2-esp32s3.ota.bin",
-        "md5": "9bb9c47819fe5c267b16a73173cfff95"
+        "md5": "4f9e4a695b0fb255366f61b70328d726"
       },
       "parts": [
         {

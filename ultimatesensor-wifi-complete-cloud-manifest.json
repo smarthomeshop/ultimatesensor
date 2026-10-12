@@ -1,6 +1,6 @@
 {
   "name": "UltimateSensor WiFi Complete Cloud",
-  "version": "2.6",
+  "version": "2.7",
   "home_assistant_domain": "esphome",
   "new_install_prompt_erase": false,
   "builds": [
@@ -8,7 +8,7 @@
       "chipFamily": "ESP32",
       "ota": {
         "path": "ultimatesensor-wifi-complete-cloud/ultimatesensor-esp32.ota.bin",
-        "md5": "f09b87311b3d937694b481fe0d1fc2ec"
+        "md5": "59536c0342c3ca72e34a2a7414c8acf3"
       },
       "parts": [
         {
