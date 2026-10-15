@@ -6,13 +6,17 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V2
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V2 1.20] - 2026-10-15
+
 
 - Fixed local Home Assistant wake-word detection only responding to the first
   command after a restart. Detection now resumes after the complete spoken
   response, including long answers, without toggling Use Wake Word.
 - Pending wake-word restarts are cancelled when detection is disabled or Home
   Assistant disconnects. The voice phase returns to idle when listening resumes.
+
 
 ## [UltimateSensor V1 2.7] - 2026-10-12
 
