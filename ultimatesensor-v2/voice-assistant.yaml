@@ -73,7 +73,6 @@ voice_assistant:
         condition:
           switch.is_on: use_wake_word
         then:
-          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
           - script.execute: start_wake_word
         else:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
@@ -82,6 +81,7 @@ voice_assistant:
     - lambda: |-
         id(voice_client_connected) = false;
         id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
+    - script.stop: start_wake_word
     - voice_assistant.stop:
     - micro_wake_word.stop:
     - if:
@@ -127,8 +127,6 @@ voice_assistant:
         condition:
           switch.is_on: use_wake_word
         then:
-          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-          - delay: 750ms
           - script.execute: start_wake_word
         else:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
@@ -151,7 +149,6 @@ voice_assistant:
         condition:
           switch.is_on: use_wake_word
         then:
-          - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
           - script.execute: start_wake_word
         else:
           - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
@@ -193,30 +190,56 @@ script:
             - media_player.volume_set:
                 id: media_player_01
                 volume: ${speaker_volume}
-            - micro_wake_word.start:
-            - script.execute: reset_voice_led
+            - script.execute: start_wake_word
 
   - id: start_wake_word
     mode: restart
     then:
-      - if:
+      # HA can send run-end while the response is still playing. Wait for the
+      # real component states instead of dropping a single delayed attempt.
+      - wait_until:
           condition:
             and:
-              - switch.is_on: use_wake_word
               - not:
                   voice_assistant.is_running:
+              - not:
+                  media_player.is_playing: media_player_01
+              - not:
+                  media_player.is_announcing: media_player_01
+      - if:
+          condition:
+            switch.is_on: use_wake_word
           then:
-            # A clean stop/start resets the model's streaming and cooldown
-            # state. Calling start while ESPHome still reports it running can
-            # leave detection alive but unable to recognize another phrase.
+            # Stopping is asynchronous; start is ignored until it completes.
             - micro_wake_word.stop:
+            - wait_until:
+                not:
+                  micro_wake_word.is_running:
             - delay: 250ms
-            - micro_wake_word.start:
-      - script.execute: reset_voice_led
+            - wait_until:
+                condition:
+                  and:
+                    - not:
+                        voice_assistant.is_running:
+                    - not:
+                        media_player.is_playing: media_player_01
+                    - not:
+                        media_player.is_announcing: media_player_01
+            - if:
+                condition:
+                  switch.is_on: use_wake_word
+                then:
+                  - micro_wake_word.start:
+                  - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+                  - logger.log:
+                      level: INFO
+                      format: "Local wake word listening restarted"
+                  - script.execute: reset_voice_led
 
   - id: stop_wake_word
     mode: restart
     then:
+      - script.stop: start_wake_word
       - micro_wake_word.stop:
       - script.execute: reset_voice_led
 
@@ -240,10 +263,6 @@ switch:
     restore_mode: ${wake_word_restore_mode}
     entity_category: config
     turn_on_action:
-      - lambda: |-
-          if (!id(init_in_progress)) {
-            id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
-          }
       - voice_assistant.stop:
       - delay: 1s
       - script.execute: start_wake_word
@@ -262,7 +281,7 @@ button:
     icon: mdi:microphone
     entity_category: config
     on_press:
-      - micro_wake_word.stop:
+      - script.execute: stop_wake_word
       - voice_assistant.start:
 
 globals:
