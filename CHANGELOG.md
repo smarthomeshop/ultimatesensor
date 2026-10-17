@@ -6,20 +6,26 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V1
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 2.8] - 2026-10-17
+
 
 - Keep humidity between 0 and 100% in cloud uploads, so a humidity offset no
   longer makes the cloud reject the whole reading.
 - Stop reporting the last particulate matter values as fresh while the PM
   sensor is off or in quiet hours.
 
-### UltimateSensor V2
+
+## [UltimateSensor V2 1.21] - 2026-10-17
+
 
 - Keep humidity between 0 and 100% in cloud uploads, so a humidity offset no
   longer makes the cloud reject the whole reading.
 - Stop reporting the last particulate matter values as fresh while the PM
   sensor is off or in quiet hours.
 - Send presence zone counts to the cloud on LD2460 variants.
+
 
 ## [UltimateSensor V2 1.20] - 2026-10-15
 
