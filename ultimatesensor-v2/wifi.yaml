@@ -18,7 +18,7 @@ wifi:
 
 captive_portal:
 
-esp32_improv:
+improv_ble:
   authorizer: none
 
 # Used by the browser flasher to configure Wi-Fi directly over USB.

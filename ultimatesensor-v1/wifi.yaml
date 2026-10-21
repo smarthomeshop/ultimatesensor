@@ -11,7 +11,7 @@ wifi:
 captive_portal:
 
 # Improv BLE + Serial (for provisioning)
-esp32_improv:
+improv_ble:
   authorizer: none
 improv_serial:
 

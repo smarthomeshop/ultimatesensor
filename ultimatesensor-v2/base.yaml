@@ -28,7 +28,7 @@ esphome:
   project:
     name: "smarthomeshop.ultimatesensor_v2"
     version: ${ultimatesensor_software_version}
-  min_version: 2026.4.0
+  min_version: 2026.10.0
   platformio_options:
     build_flags: -DBOARD_HAS_PSRAM
     board_build.flash_mode: dio
@@ -113,7 +113,7 @@ light:
     pin: GPIO43
     num_leds: 3
     chipset: ws2812
-    rgb_order: GRB
+    channel_colors: GRB
     restore_mode: ALWAYS_OFF
     default_transition_length: 0s
     rmt_symbols: 96
@@ -359,13 +359,13 @@ sensor:
 
   - platform: sgp4x
     id: sgp41
-    voc:
+    voc_index:
       id: voc_index
       name: "VOC Index"
       web_server:
         sorting_group_id: sorting_group_air_quality
         sorting_weight: 4
-    nox:
+    nox_index:
       id: nox_index
       name: "NOx Index"
       web_server:
