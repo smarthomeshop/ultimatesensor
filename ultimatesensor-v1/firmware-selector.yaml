@@ -38,14 +38,17 @@ script:
     then:
       - lambda: |-
           const std::string option = id(firmware_selector).current_option();
-          std::string url = "${manifest_base_url}/ultimatesensor-";
+          // set_source_url() keeps the pointer (ESPHome 2026.10+), so the string
+          // must outlive this lambda.
+          static std::string url;
+          url = "${manifest_base_url}/ultimatesensor-";
           url += option.find("Ethernet") != std::string::npos ? "ethernet-" : "wifi-";
           url += option.find("Complete") != std::string::npos ? "complete" : "basic";
           if (option.find("cloud") != std::string::npos)
             url += "-cloud";
           url += "-manifest.json";
           ESP_LOGI("main", "OTA updates set to use %s (%s)", option.c_str(), url.c_str());
-          id(firmware_update).set_source_url(url);
+          id(firmware_update).set_source_url(url.c_str());
 
 select:
   - platform: template
