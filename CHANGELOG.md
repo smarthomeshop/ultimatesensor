@@ -6,7 +6,15 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+### UltimateSensor V1
+
+- Updated the configuration for ESPHome 2026.10, removing deprecation
+  warnings during the build. ESPHome 2026.10.0 or newer is now required.
+
+### UltimateSensor V2
+
+- Updated the configuration for ESPHome 2026.10, removing deprecation
+  warnings during the build. ESPHome 2026.10.0 or newer is now required.
 
 ## [UltimateSensor V1 2.8] - 2026-10-17
 
