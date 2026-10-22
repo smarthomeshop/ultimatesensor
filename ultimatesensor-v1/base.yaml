@@ -11,7 +11,7 @@ esphome:
   name: ${device_name}
   friendly_name: ${friendly_name}
   name_add_mac_suffix: true
-  min_version: 2025.2.0
+  min_version: 2026.10.0
   project:
     name: "smarthomeshop.ultimatesensor"
     version: ${ultimatesensor_software_version}
@@ -63,7 +63,7 @@ light:
     id: rgb_back_led
     pin: GPIO13
     num_leds: 1
-    rgb_order: GRB
+    channel_colors: GRB
     chipset: ws2812
     name: "Back Light"
 
@@ -148,10 +148,10 @@ sensor:
 
   # SGP40
   - platform: sgp4x
-    voc:
+    voc_index:
       id: voc_index
       name: "VOC Index"
-    nox:
+    nox_index:
       id: nox_index
       name: "NOx Index"
 
