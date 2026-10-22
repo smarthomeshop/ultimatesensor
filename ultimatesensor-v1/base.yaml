@@ -106,7 +106,7 @@ display:
       }
       // Display the LUX
       if (id(illuminance).has_state()) {
-        it.printf(100, 40, id(font3), "%.0flx%", id(illuminance).state);
+        it.printf(100, 40, id(font3), "%.0flx", id(illuminance).state);
       }
       // Display PIR status
       if (id(pir_sensor).state) {
