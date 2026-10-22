@@ -6,14 +6,16 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-### UltimateSensor V1
+- Add customer-facing firmware notes here before merging a PR.
+
+## [UltimateSensor V1 2.9] - 2026-10-22
 
 - Fixed the firmware failing to build on ESPHome 2026.10.
 - Fixed the lux reading on the display showing a stray character.
 - Updated the configuration for ESPHome 2026.10, removing deprecation
   warnings during the build. ESPHome 2026.10.0 or newer is now required.
 
-### UltimateSensor V2
+## [UltimateSensor V2 1.22] - 2026-10-22
 
 - Fixed the firmware failing to build on ESPHome 2026.10.
 - Updated the configuration for ESPHome 2026.10, removing deprecation
