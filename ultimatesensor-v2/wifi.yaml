@@ -12,7 +12,7 @@ wifi:
   # Web-flashed devices start their fallback AP and are configured by the portal/improv.
   fast_connect: ${wifi_fast_connect}
   enable_rrm: true
-  # Keep setup credentials independent of hardware versions and node names.
+  # Setup credentials are fixed; ESPHome device names and hardware suffixes stay unchanged.
   ap:
     ssid: "ultimatesensor"
     password: "ultimatesensor"
