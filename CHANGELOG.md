@@ -6,14 +6,19 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
+- Add customer-facing firmware notes here before merging a PR.
 
-### UltimateSensor V1
+## [UltimateSensor V1 2.10] - 2026-10-31
+
+
+- Use `ultimatesensor` as both the fallback WiFi hotspot name and password. Device names and existing Home Assistant identities stay unchanged.
+
+
+## [UltimateSensor V2 1.23] - 2026-10-31
+
 
 - Use `ultimatesensor` as both the fallback WiFi hotspot name and password. Device names and existing Home Assistant identities stay unchanged.
 
-### UltimateSensor V2
-
-- Use `ultimatesensor` as both the fallback WiFi hotspot name and password. Device names and existing Home Assistant identities stay unchanged.
 
 
 ## [UltimateSensor V1 2.9] - 2026-10-22
