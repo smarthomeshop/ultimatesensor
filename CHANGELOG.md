@@ -6,7 +6,8 @@ This changelog starts on 2026-05-06. Earlier firmware versions existed before th
 
 ## [Unreleased]
 
-- Add customer-facing firmware notes here before merging a PR.
+- Use `ultimatesensor` as both the fallback WiFi hotspot name and password on V1 and V2, independent of hardware suffixes or custom node names. Existing ESPHome device names and Home Assistant identities are unchanged.
+
 
 ## [UltimateSensor V1 2.9] - 2026-10-22
 

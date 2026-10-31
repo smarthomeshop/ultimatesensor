@@ -118,7 +118,7 @@ We publish customer-facing WiFi and Ethernet firmware variants for V1 and V2 har
 
 1. Power the UltimateSensor with USB-C or PoE where supported.
 2. Flash the desired firmware with the web flasher or ESPHome CLI.
-3. If WiFi is not configured yet, connect to the fallback hotspot.
+3. If WiFi is not configured yet, connect to the fallback hotspot `ultimatesensor` with password `ultimatesensor`.
 4. Add the device to Home Assistant through the ESPHome integration.
 5. For V2 LD2460 upgrades, physically replace/remove the LD2450 module first, leave LD2412 installed, and flash one of the `*-ld2460` firmware files.
 6. Use the LCD display, PM sensor, and Night Mode controls from Home Assistant where available.
